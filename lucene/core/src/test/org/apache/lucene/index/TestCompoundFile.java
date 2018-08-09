@@ -7,9 +7,9 @@ package org.apache.lucene.index;
  * The ASF licenses this file to You under the Apache License, Version 2.0
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,44 +17,36 @@ package org.apache.lucene.index;
  * limitations under the License.
  */
 
-import java.io.IOException;
-import java.io.File;
-
+import org.apache.lucene.store.*;
 import org.apache.lucene.util.LuceneTestCase;
-import org.apache.lucene.store.IndexOutput;
-import org.apache.lucene.store.Directory;
-import org.apache.lucene.store.IndexInput;
-import org.apache.lucene.store.MockDirectoryWrapper;
-import org.apache.lucene.store.MockDirectoryWrapper.Failure;
-import org.apache.lucene.store.SimpleFSDirectory;
-import org.apache.lucene.store._TestHelper;
 import org.apache.lucene.util._TestUtil;
 
+import java.io.File;
+import java.io.IOException;
 
-public class TestCompoundFile extends LuceneTestCase
-{
+
+public class TestCompoundFile extends LuceneTestCase {
     private Directory dir;
 
     @Override
     public void setUp() throws Exception {
-       super.setUp();
-       File file = _TestUtil.getTempDir("testIndex");
-       // use a simple FSDir here, to be sure to have SimpleFSInputs
-       dir = new SimpleFSDirectory(file,null);
+        super.setUp();
+        File file = _TestUtil.getTempDir("testIndex");
+        // use a simple FSDir here, to be sure to have SimpleFSInputs
+        dir = new SimpleFSDirectory(file, null);
     }
 
     @Override
     public void tearDown() throws Exception {
-       dir.close();
-       super.tearDown();
+        dir.close();
+        super.tearDown();
     }
 
     /** Creates a file of the specified size with random data. */
     private void createRandomFile(Directory dir, String name, int size)
-    throws IOException
-    {
+            throws IOException {
         IndexOutput os = dir.createOutput(name);
-        for (int i=0; i<size; i++) {
+        for (int i = 0; i < size; i++) {
             byte b = (byte) (Math.random() * 256);
             os.writeByte(b);
         }
@@ -69,12 +61,11 @@ public class TestCompoundFile extends LuceneTestCase
                                     String name,
                                     byte start,
                                     int size)
-    throws IOException
-    {
+            throws IOException {
         IndexOutput os = dir.createOutput(name);
-        for (int i=0; i < size; i++) {
+        for (int i = 0; i < size; i++) {
             os.writeByte(start);
-            start ++;
+            start++;
         }
         os.close();
     }
@@ -83,24 +74,23 @@ public class TestCompoundFile extends LuceneTestCase
     private void assertSameStreams(String msg,
                                    IndexInput expected,
                                    IndexInput test)
-    throws IOException
-    {
+            throws IOException {
         assertNotNull(msg + " null expected", expected);
         assertNotNull(msg + " null test", test);
         assertEquals(msg + " length", expected.length(), test.length());
         assertEquals(msg + " position", expected.getFilePointer(),
-                                        test.getFilePointer());
+                test.getFilePointer());
 
         byte expectedBuffer[] = new byte[512];
         byte testBuffer[] = new byte[expectedBuffer.length];
 
         long remainder = expected.length() - expected.getFilePointer();
-        while(remainder > 0) {
+        while (remainder > 0) {
             int readLen = (int) Math.min(remainder, expectedBuffer.length);
             expected.readBytes(expectedBuffer, 0, readLen);
             test.readBytes(testBuffer, 0, readLen);
             assertEqualArrays(msg + ", remainder " + remainder, expectedBuffer,
-                testBuffer, 0, readLen);
+                    testBuffer, 0, readLen);
             remainder -= readLen;
         }
     }
@@ -110,10 +100,8 @@ public class TestCompoundFile extends LuceneTestCase
                                    IndexInput expected,
                                    IndexInput actual,
                                    long seekTo)
-    throws IOException
-    {
-        if(seekTo >= 0 && seekTo < expected.length())
-        {
+            throws IOException {
+        if (seekTo >= 0 && seekTo < expected.length()) {
             expected.seek(seekTo);
             actual.seek(seekTo);
             assertSameStreams(msg + ", seek(mid)", expected, actual);
@@ -121,12 +109,10 @@ public class TestCompoundFile extends LuceneTestCase
     }
 
 
-
     private void assertSameSeekBehavior(String msg,
                                         IndexInput expected,
                                         IndexInput actual)
-    throws IOException
-    {
+            throws IOException {
         // seek to 0
         long point = 0;
         assertSameStreams(msg + ", seek(0)", expected, actual, point);
@@ -157,12 +143,11 @@ public class TestCompoundFile extends LuceneTestCase
                                    byte[] expected,
                                    byte[] test,
                                    int start,
-                                   int len)
-    {
+                                   int len) {
         assertNotNull(msg + " null expected", expected);
         assertNotNull(msg + " null test", test);
 
-        for (int i=start; i<len; i++) {
+        for (int i = start; i < len; i++) {
             assertEquals(msg + " " + i, expected[i], test[i]);
         }
     }
@@ -177,8 +162,8 @@ public class TestCompoundFile extends LuceneTestCase
      *  Files of different sizes are tested: 0, 1, 10, 100 bytes.
      */
     public void testSingleFile() throws IOException {
-        int data[] = new int[] { 0, 1, 10, 100 };
-        for (int i=0; i<data.length; i++) {
+        int data[] = new int[]{0, 1, 10, 100};
+        for (int i = 0; i < data.length; i++) {
             String name = "t" + data[i];
             createSequenceFile(dir, name, (byte) 0, data[i]);
             CompoundFileWriter csw = new CompoundFileWriter(dir, name + ".cfs");
@@ -255,17 +240,17 @@ public class TestCompoundFile extends LuceneTestCase
 
         // Now test
         CompoundFileWriter csw = new CompoundFileWriter(dir, "test.cfs");
-        final String data[] = new String[] {
-            ".zero", ".one", ".ten", ".hundred", ".big1", ".big2", ".big3",
-            ".big4", ".big5", ".big6", ".big7"
+        final String data[] = new String[]{
+                ".zero", ".one", ".ten", ".hundred", ".big1", ".big2", ".big3",
+                ".big4", ".big5", ".big6", ".big7"
         };
-        for (int i=0; i<data.length; i++) {
+        for (int i = 0; i < data.length; i++) {
             csw.addFile(segment + data[i]);
         }
         csw.close();
 
         CompoundFileReader csr = new CompoundFileReader(dir, "test.cfs");
-        for (int i=0; i<data.length; i++) {
+        for (int i = 0; i < data.length; i++) {
             IndexInput check = dir.openInput(segment + data[i]);
             IndexInput test = csr.openInput(segment + data[i]);
             assertSameStreams(data[i], check, test);
@@ -284,7 +269,7 @@ public class TestCompoundFile extends LuceneTestCase
      */
     private void setUp_2() throws IOException {
         CompoundFileWriter cw = new CompoundFileWriter(dir, "f.comp");
-        for (int i=0; i<20; i++) {
+        for (int i = 0; i < 20; i++) {
             createSequenceFile(dir, "f" + i, (byte) 0, 2000);
             cw.addFile("f" + i);
         }
@@ -297,11 +282,10 @@ public class TestCompoundFile extends LuceneTestCase
     }
 
     private void demo_FSIndexInputBug(Directory fsdir, String file)
-    throws IOException
-    {
+            throws IOException {
         // Setup the test file - we need more than 1024 bytes
         IndexOutput os = fsdir.createOutput(file);
-        for(int i=0; i<2000; i++) {
+        for (int i = 0; i < 2000; i++) {
             os.writeByte((byte) i);
         }
         os.close();
@@ -327,7 +311,7 @@ public class TestCompoundFile extends LuceneTestCase
             in.readByte();
             fail("expected readByte() to throw exception");
         } catch (IOException e) {
-          // expected exception
+            // expected exception
         }
     }
 
@@ -339,7 +323,7 @@ public class TestCompoundFile extends LuceneTestCase
     static boolean isCSIndexInputOpen(IndexInput is) throws IOException {
         if (isCSIndexInput(is)) {
             CompoundFileReader.CSIndexInput cis =
-            (CompoundFileReader.CSIndexInput) is;
+                    (CompoundFileReader.CSIndexInput) is;
 
             return _TestHelper.isSimpleFSIndexInputOpen(cis.base);
         } else {
@@ -615,7 +599,7 @@ public class TestCompoundFile extends LuceneTestCase
         IndexOutput os = dir.createOutput("testBufferStart.txt");
 
         byte[] largeBuf = new byte[2048];
-        for (int i=0; i<largeBuf.length; i++) {
+        for (int i = 0; i < largeBuf.length; i++) {
             largeBuf[i] = (byte) (Math.random() * 256);
         }
 
@@ -629,60 +613,60 @@ public class TestCompoundFile extends LuceneTestCase
         }
 
     }
-    
-   public void testAddExternalFile() throws IOException {
-       createSequenceFile(dir, "d1", (byte) 0, 15);
 
-       Directory newDir = newDirectory();
-       CompoundFileWriter csw = new CompoundFileWriter(newDir, "d.csf");
-       csw.addFile("d1", dir);
-       csw.close();
+    public void testAddExternalFile() throws IOException {
+        createSequenceFile(dir, "d1", (byte) 0, 15);
 
-       CompoundFileReader csr = new CompoundFileReader(newDir, "d.csf");
-       IndexInput expected = dir.openInput("d1");
-       IndexInput actual = csr.openInput("d1");
-       assertSameStreams("d1", expected, actual);
-       assertSameSeekBehavior("d1", expected, actual);
-       expected.close();
-       actual.close();
-       csr.close();
-       
-       newDir.close();
-   }
+        Directory newDir = newDirectory();
+        CompoundFileWriter csw = new CompoundFileWriter(newDir, "d.csf");
+        csw.addFile("d1", dir);
+        csw.close();
 
-  // Make sure we don't somehow use more than 1 descriptor
-  // when reading a CFS with many subs:
-  public void testManySubFiles() throws IOException {
+        CompoundFileReader csr = new CompoundFileReader(newDir, "d.csf");
+        IndexInput expected = dir.openInput("d1");
+        IndexInput actual = csr.openInput("d1");
+        assertSameStreams("d1", expected, actual);
+        assertSameSeekBehavior("d1", expected, actual);
+        expected.close();
+        actual.close();
+        csr.close();
 
-    final Directory d = newFSDirectory(_TestUtil.getTempDir("CFSManySubFiles"));
-    final int FILE_COUNT = atLeast(500);
-
-    for(int fileIdx=0;fileIdx<FILE_COUNT;fileIdx++) {
-      IndexOutput out = d.createOutput("file." + fileIdx);
-      out.writeByte((byte) fileIdx);
-      out.close();
-    }
-    
-    final CompoundFileWriter cfw = new CompoundFileWriter(d, "c.cfs");
-    for(int fileIdx=0;fileIdx<FILE_COUNT;fileIdx++) {
-      cfw.addFile("file." + fileIdx);
-    }
-    cfw.close();
-
-    final IndexInput[] ins = new IndexInput[FILE_COUNT];
-    final CompoundFileReader cfr = new CompoundFileReader(d, "c.cfs");
-    for(int fileIdx=0;fileIdx<FILE_COUNT;fileIdx++) {
-      ins[fileIdx] = cfr.openInput("file." + fileIdx);
+        newDir.close();
     }
 
-    for(int fileIdx=0;fileIdx<FILE_COUNT;fileIdx++) {
-      assertEquals((byte) fileIdx, ins[fileIdx].readByte());
-    }
+    // Make sure we don't somehow use more than 1 descriptor
+    // when reading a CFS with many subs:
+    public void testManySubFiles() throws IOException {
 
-    for(int fileIdx=0;fileIdx<FILE_COUNT;fileIdx++) {
-      ins[fileIdx].close();
+        final Directory d = newFSDirectory(_TestUtil.getTempDir("CFSManySubFiles"));
+        final int FILE_COUNT = atLeast(500);
+
+        for (int fileIdx = 0; fileIdx < FILE_COUNT; fileIdx++) {
+            IndexOutput out = d.createOutput("file." + fileIdx);
+            out.writeByte((byte) fileIdx);
+            out.close();
+        }
+
+        final CompoundFileWriter cfw = new CompoundFileWriter(d, "c.cfs");
+        for (int fileIdx = 0; fileIdx < FILE_COUNT; fileIdx++) {
+            cfw.addFile("file." + fileIdx);
+        }
+        cfw.close();
+
+        final IndexInput[] ins = new IndexInput[FILE_COUNT];
+        final CompoundFileReader cfr = new CompoundFileReader(d, "c.cfs");
+        for (int fileIdx = 0; fileIdx < FILE_COUNT; fileIdx++) {
+            ins[fileIdx] = cfr.openInput("file." + fileIdx);
+        }
+
+        for (int fileIdx = 0; fileIdx < FILE_COUNT; fileIdx++) {
+            assertEquals((byte) fileIdx, ins[fileIdx].readByte());
+        }
+
+        for (int fileIdx = 0; fileIdx < FILE_COUNT; fileIdx++) {
+            ins[fileIdx].close();
+        }
+        cfr.close();
+        d.close();
     }
-    cfr.close();
-    d.close();
-  }
 }

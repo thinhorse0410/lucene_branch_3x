@@ -7,9 +7,9 @@ package org.apache.lucene.search;
  * The ASF licenses this file to You under the Apache License, Version 2.0
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,37 +17,37 @@ package org.apache.lucene.search;
  * limitations under the License.
  */
 
-import org.apache.lucene.util.LuceneTestCase;
 import org.apache.lucene.analysis.MockAnalyzer;
+import org.apache.lucene.util.LuceneTestCase;
 
 public class TestQueryTermVector extends LuceneTestCase {
 
-  public void testConstructor() {
-    String [] queryTerm = {"foo", "bar", "foo", "again", "foo", "bar", "go", "go", "go"};
-    //Items are sorted lexicographically
-    String [] gold = {"again", "bar", "foo", "go"};
-    int [] goldFreqs = {1, 2, 3, 3};
-    QueryTermVector result = new QueryTermVector(queryTerm);
-    String [] terms = result.getTerms();
-    assertTrue(terms.length == 4);
-    int [] freq = result.getTermFrequencies();
-    assertTrue(freq.length == 4);
-    checkGold(terms, gold, freq, goldFreqs);
-    result = new QueryTermVector(null);
-    assertTrue(result.getTerms().length == 0);
-    
-    result = new QueryTermVector("foo bar foo again foo bar go go go", new MockAnalyzer(random));
-    terms = result.getTerms();
-    assertTrue(terms.length == 4);
-    freq = result.getTermFrequencies();
-    assertTrue(freq.length == 4);
-    checkGold(terms, gold, freq, goldFreqs);
-  }
+    public void testConstructor() {
+        String[] queryTerm = {"foo", "bar", "foo", "again", "foo", "bar", "go", "go", "go"};
+        //Items are sorted lexicographically
+        String[] gold = {"again", "bar", "foo", "go"};
+        int[] goldFreqs = {1, 2, 3, 3};
+        QueryTermVector result = new QueryTermVector(queryTerm);
+        String[] terms = result.getTerms();
+        assertTrue(terms.length == 4);
+        int[] freq = result.getTermFrequencies();
+        assertTrue(freq.length == 4);
+        checkGold(terms, gold, freq, goldFreqs);
+        result = new QueryTermVector(null);
+        assertTrue(result.getTerms().length == 0);
 
-  private void checkGold(String[] terms, String[] gold, int[] freq, int[] goldFreqs) {
-    for (int i = 0; i < terms.length; i++) {
-      assertTrue(terms[i].equals(gold[i]));
-      assertTrue(freq[i] == goldFreqs[i]);
+        result = new QueryTermVector("foo bar foo again foo bar go go go", new MockAnalyzer(random));
+        terms = result.getTerms();
+        assertTrue(terms.length == 4);
+        freq = result.getTermFrequencies();
+        assertTrue(freq.length == 4);
+        checkGold(terms, gold, freq, goldFreqs);
     }
-  }
+
+    private void checkGold(String[] terms, String[] gold, int[] freq, int[] goldFreqs) {
+        for (int i = 0; i < terms.length; i++) {
+            assertTrue(terms[i].equals(gold[i]));
+            assertTrue(freq[i] == goldFreqs[i]);
+        }
+    }
 }

@@ -7,17 +7,15 @@ package org.apache.lucene.index;
  * The ASF licenses this file to You under the Apache License, Version 2.0
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-import java.io.IOException;
 
 import org.apache.lucene.analysis.MockAnalyzer;
 import org.apache.lucene.analysis.WhitespaceAnalyzer;
@@ -32,6 +30,8 @@ import org.apache.lucene.store.MockDirectoryWrapper;
 import org.apache.lucene.store.RAMDirectory;
 import org.apache.lucene.util.LuceneTestCase;
 
+import java.io.IOException;
+
 /**
  * Tests lazy skipping on the proximity file.
  *
@@ -39,39 +39,39 @@ import org.apache.lucene.util.LuceneTestCase;
 public class TestLazyProxSkipping extends LuceneTestCase {
     private Searcher searcher;
     private int seeksCounter = 0;
-    
+
     private String field = "tokens";
     private String term1 = "xx";
     private String term2 = "yy";
     private String term3 = "zz";
 
     private class SeekCountingDirectory extends MockDirectoryWrapper {
-      public SeekCountingDirectory(Directory delegate) {
-        super(random, delegate);
-      }
-
-      @Override
-      public IndexInput openInput(String name) throws IOException {
-        IndexInput ii = super.openInput(name);
-        if (name.endsWith(".prx")) {
-          // we decorate the proxStream with a wrapper class that allows to count the number of calls of seek()
-          ii = new SeeksCountingStream(ii);
+        public SeekCountingDirectory(Directory delegate) {
+            super(random, delegate);
         }
-        return ii;
-      }
-      
+
+        @Override
+        public IndexInput openInput(String name) throws IOException {
+            IndexInput ii = super.openInput(name);
+            if (name.endsWith(".prx")) {
+                // we decorate the proxStream with a wrapper class that allows to count the number of calls of seek()
+                ii = new SeeksCountingStream(ii);
+            }
+            return ii;
+        }
+
     }
-    
+
     private void createIndex(int numHits) throws IOException {
         int numDocs = 500;
-        
+
         Directory directory = new SeekCountingDirectory(new RAMDirectory());
         // note: test explicitly disables payloads
         IndexWriter writer = new IndexWriter(
-            directory,
-            newIndexWriterConfig(TEST_VERSION_CURRENT, new WhitespaceAnalyzer(TEST_VERSION_CURRENT)).
-                setMaxBufferedDocs(10).
-                setMergePolicy(newLogMergePolicy(false))
+                directory,
+                newIndexWriterConfig(TEST_VERSION_CURRENT, new WhitespaceAnalyzer(TEST_VERSION_CURRENT)).
+                        setMaxBufferedDocs(10).
+                        setMergePolicy(newLogMergePolicy(false))
         );
         for (int i = 0; i < numDocs; i++) {
             Document doc = new Document();
@@ -90,36 +90,36 @@ public class TestLazyProxSkipping extends LuceneTestCase {
             doc.add(newField(this.field, content, Field.Store.YES, Field.Index.ANALYZED));
             writer.addDocument(doc);
         }
-        
+
         // make sure the index has only a single segment
         writer.forceMerge(1);
         writer.close();
-        
+
         SegmentReader reader = SegmentReader.getOnlySegmentReader(directory);
 
-      this.searcher = newSearcher(reader);
+        this.searcher = newSearcher(reader);
     }
-    
+
     private ScoreDoc[] search() throws IOException {
         // create PhraseQuery "term1 term2" and search
         PhraseQuery pq = new PhraseQuery();
         pq.add(new Term(this.field, this.term1));
         pq.add(new Term(this.field, this.term2));
-        return this.searcher.search(pq, null, 1000).scoreDocs;        
+        return this.searcher.search(pq, null, 1000).scoreDocs;
     }
-    
+
     private void performTest(int numHits) throws IOException {
         createIndex(numHits);
         this.seeksCounter = 0;
         ScoreDoc[] hits = search();
         // verify that the right number of docs was found
         assertEquals(numHits, hits.length);
-        
+
         // check if the number of calls of seek() does not exceed the number of hits
         assertTrue(this.seeksCounter > 0);
         assertTrue(this.seeksCounter <= numHits + 1);
     }
-    
+
     public void testLazySkipping() throws IOException {
         // test whether only the minimum amount of seeks()
         // are performed
@@ -128,16 +128,16 @@ public class TestLazyProxSkipping extends LuceneTestCase {
         performTest(10);
         searcher.close();
     }
-    
+
     public void testSeek() throws IOException {
         Directory directory = newDirectory();
-        IndexWriter writer = new IndexWriter(directory, newIndexWriterConfig( TEST_VERSION_CURRENT, new MockAnalyzer(random)));
+        IndexWriter writer = new IndexWriter(directory, newIndexWriterConfig(TEST_VERSION_CURRENT, new MockAnalyzer(random)));
         for (int i = 0; i < 10; i++) {
             Document doc = new Document();
             doc.add(newField(this.field, "a b", Field.Store.YES, Field.Index.ANALYZED));
             writer.addDocument(doc);
         }
-        
+
         writer.close();
         IndexReader reader = IndexReader.open(directory, true);
         TermPositions tp = reader.termPositions();
@@ -155,56 +155,56 @@ public class TestLazyProxSkipping extends LuceneTestCase {
         }
         reader.close();
         directory.close();
-        
+
     }
-    
+
 
     // Simply extends IndexInput in a way that we are able to count the number
     // of invocations of seek()
     class SeeksCountingStream extends IndexInput {
-          private IndexInput input;      
-          
-          
-          SeeksCountingStream(IndexInput input) {
-              super("SeekCountingStream(" + input + ")");
-              this.input = input;
-          }      
-                
-          @Override
-          public byte readByte() throws IOException {
-              return this.input.readByte();
-          }
-    
-          @Override
-          public void readBytes(byte[] b, int offset, int len) throws IOException {
-              this.input.readBytes(b, offset, len);        
-          }
-    
-          @Override
-          public void close() throws IOException {
-              this.input.close();
-          }
-    
-          @Override
-          public long getFilePointer() {
-              return this.input.getFilePointer();
-          }
-    
-          @Override
-          public void seek(long pos) throws IOException {
-              TestLazyProxSkipping.this.seeksCounter++;
-              this.input.seek(pos);
-          }
-    
-          @Override
-          public long length() {
-              return this.input.length();
-          }
-          
-          @Override
-          public Object clone() {
-              return new SeeksCountingStream((IndexInput) this.input.clone());
-          }
-      
+        private IndexInput input;
+
+
+        SeeksCountingStream(IndexInput input) {
+            super("SeekCountingStream(" + input + ")");
+            this.input = input;
+        }
+
+        @Override
+        public byte readByte() throws IOException {
+            return this.input.readByte();
+        }
+
+        @Override
+        public void readBytes(byte[] b, int offset, int len) throws IOException {
+            this.input.readBytes(b, offset, len);
+        }
+
+        @Override
+        public void close() throws IOException {
+            this.input.close();
+        }
+
+        @Override
+        public long getFilePointer() {
+            return this.input.getFilePointer();
+        }
+
+        @Override
+        public void seek(long pos) throws IOException {
+            TestLazyProxSkipping.this.seeksCounter++;
+            this.input.seek(pos);
+        }
+
+        @Override
+        public long length() {
+            return this.input.length();
+        }
+
+        @Override
+        public Object clone() {
+            return new SeeksCountingStream((IndexInput) this.input.clone());
+        }
+
     }
 }

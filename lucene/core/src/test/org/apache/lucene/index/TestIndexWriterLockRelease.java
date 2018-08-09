@@ -7,9 +7,9 @@ package org.apache.lucene.index;
  * The ASF licenses this file to You under the Apache License, Version 2.0
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,15 +17,15 @@ package org.apache.lucene.index;
  * limitations under the License.
  */
 
+import org.apache.lucene.analysis.standard.StandardAnalyzer;
+import org.apache.lucene.index.IndexWriterConfig.OpenMode;
+import org.apache.lucene.store.Directory;
+import org.apache.lucene.util.LuceneTestCase;
+import org.apache.lucene.util._TestUtil;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import org.apache.lucene.util.LuceneTestCase;
-import org.apache.lucene.analysis.standard.StandardAnalyzer;
-import org.apache.lucene.util._TestUtil;
-import org.apache.lucene.index.IndexWriter;
-import org.apache.lucene.index.IndexWriterConfig.OpenMode;
-import org.apache.lucene.store.Directory;
 
 /**
  * This tests the patch for issue #LUCENE-715 (IndexWriter does not
@@ -47,7 +47,7 @@ public class TestIndexWriterLockRelease extends LuceneTestCase {
             }
 
             if (!this.__test_dir.mkdirs()
-                && !this.__test_dir.isDirectory()) {
+                    && !this.__test_dir.isDirectory()) {
                 throw new IOException("unable to create test directory \"" + this.__test_dir.getPath() + "\"");
             }
         }
@@ -59,8 +59,8 @@ public class TestIndexWriterLockRelease extends LuceneTestCase {
             File[] files = this.__test_dir.listFiles();
 
             for (int i = 0;
-                i < files.length;
-                ++i) {
+                 i < files.length;
+                 ++i) {
                 if (!files[i].delete()) {
                     throw new IOException("unable to remove file in test directory \"" + this.__test_dir.getPath() + "\" (please remove by hand)");
                 }
@@ -76,18 +76,18 @@ public class TestIndexWriterLockRelease extends LuceneTestCase {
     public void testIndexWriterLockRelease() throws IOException {
         Directory dir = newFSDirectory(this.__test_dir);
         try {
-          new IndexWriter(dir, new IndexWriterConfig(TEST_VERSION_CURRENT,
-              new StandardAnalyzer(TEST_VERSION_CURRENT))
-          .setOpenMode(OpenMode.APPEND));
+            new IndexWriter(dir, new IndexWriterConfig(TEST_VERSION_CURRENT,
+                    new StandardAnalyzer(TEST_VERSION_CURRENT))
+                    .setOpenMode(OpenMode.APPEND));
         } catch (FileNotFoundException e) {
             try {
-              new IndexWriter(dir, new IndexWriterConfig(TEST_VERSION_CURRENT,
-                  new StandardAnalyzer(TEST_VERSION_CURRENT))
-              .setOpenMode(OpenMode.APPEND));
+                new IndexWriter(dir, new IndexWriterConfig(TEST_VERSION_CURRENT,
+                        new StandardAnalyzer(TEST_VERSION_CURRENT))
+                        .setOpenMode(OpenMode.APPEND));
             } catch (FileNotFoundException e1) {
             }
         } finally {
-          dir.close();
+            dir.close();
         }
     }
 }

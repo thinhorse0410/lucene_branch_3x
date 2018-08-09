@@ -7,9 +7,9 @@ package org.apache.lucene.index;
  * The ASF licenses this file to You under the Apache License, Version 2.0
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -29,48 +29,48 @@ import org.apache.lucene.util.LuceneTestCase;
 import org.apache.lucene.util._TestUtil;
 
 public class TestReaderClosed extends LuceneTestCase {
-  private IndexSearcher searcher;
-  private IndexReader reader;
-  private Directory dir;
+    private IndexSearcher searcher;
+    private IndexReader reader;
+    private Directory dir;
 
-  @Override
-  public void setUp() throws Exception {
-    super.setUp();
-    dir = newDirectory();
-    RandomIndexWriter writer = new RandomIndexWriter(random, dir, 
-        newIndexWriterConfig(TEST_VERSION_CURRENT, new MockAnalyzer(random, MockTokenizer.KEYWORD, false))
-        .setMaxBufferedDocs(_TestUtil.nextInt(random, 50, 1000)));
-    
-    Document doc = new Document();
-    Field field = newField("field", "", Field.Store.NO, Field.Index.NOT_ANALYZED);
-    doc.add(field);
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
+        dir = newDirectory();
+        RandomIndexWriter writer = new RandomIndexWriter(random, dir,
+                newIndexWriterConfig(TEST_VERSION_CURRENT, new MockAnalyzer(random, MockTokenizer.KEYWORD, false))
+                        .setMaxBufferedDocs(_TestUtil.nextInt(random, 50, 1000)));
 
-    // we generate aweful prefixes: good for testing.
-    // but for preflex codec, the test can be very slow, so use less iterations.
-    int num = atLeast(10);
-    for (int i = 0; i < num; i++) {
-      field.setValue(_TestUtil.randomUnicodeString(random, 10));
-      writer.addDocument(doc);
+        Document doc = new Document();
+        Field field = newField("field", "", Field.Store.NO, Field.Index.NOT_ANALYZED);
+        doc.add(field);
+
+        // we generate aweful prefixes: good for testing.
+        // but for preflex codec, the test can be very slow, so use less iterations.
+        int num = atLeast(10);
+        for (int i = 0; i < num; i++) {
+            field.setValue(_TestUtil.randomUnicodeString(random, 10));
+            writer.addDocument(doc);
+        }
+        reader = writer.getReader();
+        searcher = newSearcher(reader);
+        writer.close();
     }
-    reader = writer.getReader();
-    searcher = newSearcher(reader);
-    writer.close();
-  }
-  
-  public void test() throws Exception {
-    TermRangeQuery query = new TermRangeQuery("field", "a", "z", true, true);
-    searcher.search(query, 5);
-    searcher.close();
-    reader.close();
-    try {
-      searcher.search(query, 5);
-    } catch (AlreadyClosedException ace) {
-      // expected
+
+    public void test() throws Exception {
+        TermRangeQuery query = new TermRangeQuery("field", "a", "z", true, true);
+        searcher.search(query, 5);
+        searcher.close();
+        reader.close();
+        try {
+            searcher.search(query, 5);
+        } catch (AlreadyClosedException ace) {
+            // expected
+        }
     }
-  }
-  
-  public void tearDown() throws Exception {
-    dir.close();
-    super.tearDown();
-  }
+
+    public void tearDown() throws Exception {
+        dir.close();
+        super.tearDown();
+    }
 }

@@ -7,9 +7,9 @@ package org.apache.lucene.index;
  * The ASF licenses this file to You under the Apache License, Version 2.0
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,48 +17,47 @@ package org.apache.lucene.index;
  * limitations under the License.
  */
 
-import java.io.IOException;
-
-import org.apache.lucene.util.LuceneTestCase;
 import org.apache.lucene.analysis.MockAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field.Index;
 import org.apache.lucene.document.Field.Store;
-import org.apache.lucene.search.DocIdSetIterator;
 import org.apache.lucene.store.Directory;
+import org.apache.lucene.util.LuceneTestCase;
+
+import java.io.IOException;
 
 public class TestParallelTermEnum extends LuceneTestCase {
     private IndexReader ir1;
     private IndexReader ir2;
     private Directory rd1;
     private Directory rd2;
-    
+
     @Override
     public void setUp() throws Exception {
         super.setUp();
         Document doc;
         rd1 = newDirectory();
-        IndexWriter iw1 = new IndexWriter(rd1, newIndexWriterConfig( TEST_VERSION_CURRENT, new MockAnalyzer(random)));
+        IndexWriter iw1 = new IndexWriter(rd1, newIndexWriterConfig(TEST_VERSION_CURRENT, new MockAnalyzer(random)));
 
         doc = new Document();
         doc.add(newField("field1", "the quick brown fox jumps", Store.YES,
-            Index.ANALYZED));
+                Index.ANALYZED));
         doc.add(newField("field2", "the quick brown fox jumps", Store.YES,
-            Index.ANALYZED));
+                Index.ANALYZED));
         doc.add(newField("field4", "", Store.NO, Index.ANALYZED));
         iw1.addDocument(doc);
 
         iw1.close();
 
         rd2 = newDirectory();
-        IndexWriter iw2 = new IndexWriter(rd2, newIndexWriterConfig( TEST_VERSION_CURRENT, new MockAnalyzer(random)));
+        IndexWriter iw2 = new IndexWriter(rd2, newIndexWriterConfig(TEST_VERSION_CURRENT, new MockAnalyzer(random)));
 
         doc = new Document();
         doc.add(newField("field0", "", Store.NO, Index.ANALYZED));
         doc.add(newField("field1", "the fox jumps over the lazy dog",
-            Store.YES, Index.ANALYZED));
+                Store.YES, Index.ANALYZED));
         doc.add(newField("field3", "the fox jumps over the lazy dog",
-            Store.YES, Index.ANALYZED));
+                Store.YES, Index.ANALYZED));
         iw2.addDocument(doc);
 
         iw2.close();

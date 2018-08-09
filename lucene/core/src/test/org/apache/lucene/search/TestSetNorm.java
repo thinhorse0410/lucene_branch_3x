@@ -7,9 +7,9 @@ package org.apache.lucene.search;
  * The ASF licenses this file to You under the Apache License, Version 2.0
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,15 +17,17 @@ package org.apache.lucene.search;
  * limitations under the License.
  */
 
-import java.io.IOException;
-
-import org.apache.lucene.util.LuceneTestCase;
 import org.apache.lucene.analysis.MockAnalyzer;
-import org.apache.lucene.document.*;
+import org.apache.lucene.document.Document;
+import org.apache.lucene.document.Field;
+import org.apache.lucene.document.Fieldable;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.store.Directory;
+import org.apache.lucene.util.LuceneTestCase;
+
+import java.io.IOException;
 
 /** Document boost unit test.
  *
@@ -34,63 +36,67 @@ import org.apache.lucene.store.Directory;
  */
 public class TestSetNorm extends LuceneTestCase {
 
-  public void testSetNorm() throws Exception {
-    Directory store = newDirectory();
-    IndexWriter writer = new IndexWriter(store, newIndexWriterConfig( TEST_VERSION_CURRENT, new MockAnalyzer(random)));
+    public void testSetNorm() throws Exception {
+        Directory store = newDirectory();
+        IndexWriter writer = new IndexWriter(store, newIndexWriterConfig(TEST_VERSION_CURRENT, new MockAnalyzer(random)));
 
-    // add the same document four times
-    Fieldable f1 = newField("field", "word", Field.Store.YES, Field.Index.ANALYZED);
-    Document d1 = new Document();
-    d1.add(f1);
-    writer.addDocument(d1);
-    writer.addDocument(d1);
-    writer.addDocument(d1);
-    writer.addDocument(d1);
-    writer.close();
+        // add the same document four times
+        Fieldable f1 = newField("field", "word", Field.Store.YES, Field.Index.ANALYZED);
+        Document d1 = new Document();
+        d1.add(f1);
+        writer.addDocument(d1);
+        writer.addDocument(d1);
+        writer.addDocument(d1);
+        writer.addDocument(d1);
+        writer.close();
 
-    // reset the boost of each instance of this document
-    IndexReader reader = IndexReader.open(store, false);
-    reader.setNorm(0, "field", 1.0f);
-    reader.setNorm(1, "field", 2.0f);
-    reader.setNorm(2, "field", 4.0f);
-    reader.setNorm(3, "field", 16.0f);
-    reader.close();
+        // reset the boost of each instance of this document
+        IndexReader reader = IndexReader.open(store, false);
+        reader.setNorm(0, "field", 1.0f);
+        reader.setNorm(1, "field", 2.0f);
+        reader.setNorm(2, "field", 4.0f);
+        reader.setNorm(3, "field", 16.0f);
+        reader.close();
 
-    // check that searches are ordered by this boost
-    final float[] scores = new float[4];
+        // check that searches are ordered by this boost
+        final float[] scores = new float[4];
 
-    IndexReader ir = IndexReader.open(store);
-    IndexSearcher is = new IndexSearcher(ir);
-    is.search
-      (new TermQuery(new Term("field", "word")),
-       new Collector() {
-         private int base = 0;
-         private Scorer scorer;
-         @Override
-         public void setScorer(Scorer scorer) throws IOException {
-          this.scorer = scorer;
-         }
-         @Override
-         public final void collect(int doc) throws IOException {
-           scores[doc + base] = scorer.score();
-         }
-         @Override
-         public void setNextReader(IndexReader reader, int docBase) {
-           base = docBase;
-         }
-         @Override
-         public boolean acceptsDocsOutOfOrder() {
-           return true;
-         }
-       });
-    is.close();
-    ir.close();
-    float lastScore = 0.0f;
+        IndexReader ir = IndexReader.open(store);
+        IndexSearcher is = new IndexSearcher(ir);
+        is.search
+                (new TermQuery(new Term("field", "word")),
+                        new Collector() {
+                            private int base = 0;
+                            private Scorer scorer;
 
-    for (int i = 0; i < 4; i++) {
-      assertTrue(scores[i] > lastScore);
-      lastScore = scores[i];
+                            @Override
+                            public void setScorer(Scorer scorer) throws IOException {
+                                this.scorer = scorer;
+                            }
+
+                            @Override
+                            public final void collect(int doc) throws IOException {
+                                scores[doc + base] = scorer.score();
+                            }
+
+                            @Override
+                            public void setNextReader(IndexReader reader, int docBase) {
+                                base = docBase;
+                            }
+
+                            @Override
+                            public boolean acceptsDocsOutOfOrder() {
+                                return true;
+                            }
+                        });
+        is.close();
+        ir.close();
+        float lastScore = 0.0f;
+
+        for (int i = 0; i < 4; i++) {
+            assertTrue(scores[i] > lastScore);
+            lastScore = scores[i];
+        }
+        store.close();
     }
-    store.close();
-  }
 }

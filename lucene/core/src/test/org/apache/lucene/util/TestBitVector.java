@@ -7,9 +7,9 @@ package org.apache.lucene.util;
  * The ASF licenses this file to You under the Apache License, Version 2.0
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,16 +17,15 @@ package org.apache.lucene.util;
  * limitations under the License.
  */
 
-import java.io.IOException;
-
 import org.apache.lucene.store.MockDirectoryWrapper;
 import org.apache.lucene.store.RAMDirectory;
+
+import java.io.IOException;
 
 /**
  * <code>TestBitVector</code> tests the <code>BitVector</code>, obviously.
  */
-public class TestBitVector extends LuceneTestCase
-{
+public class TestBitVector extends LuceneTestCase {
 
     /**
      * Test the default constructor on BitVectors of various sizes.
@@ -41,7 +40,7 @@ public class TestBitVector extends LuceneTestCase
 
     private void doTestConstructOfSize(int n) {
         BitVector bv = new BitVector(n);
-        assertEquals(n,bv.size());
+        assertEquals(n, bv.size());
     }
 
     /**
@@ -57,7 +56,7 @@ public class TestBitVector extends LuceneTestCase
 
     private void doTestGetSetVectorOfSize(int n) {
         BitVector bv = new BitVector(n);
-        for(int i=0;i<bv.size();i++) {
+        for (int i = 0; i < bv.size(); i++) {
             // ensure a set bit can be git'
             assertFalse(bv.get(i));
             bv.set(i);
@@ -78,7 +77,7 @@ public class TestBitVector extends LuceneTestCase
 
     private void doTestClearVectorOfSize(int n) {
         BitVector bv = new BitVector(n);
-        for(int i=0;i<bv.size();i++) {
+        for (int i = 0; i < bv.size(); i++) {
             // ensure a set bit is cleared
             assertFalse(bv.get(i));
             bv.set(i);
@@ -102,25 +101,25 @@ public class TestBitVector extends LuceneTestCase
     private void doTestCountVectorOfSize(int n) {
         BitVector bv = new BitVector(n);
         // test count when incrementally setting bits
-        for(int i=0;i<bv.size();i++) {
+        for (int i = 0; i < bv.size(); i++) {
             assertFalse(bv.get(i));
-            assertEquals(i,bv.count());
+            assertEquals(i, bv.count());
             bv.set(i);
             assertTrue(bv.get(i));
-            assertEquals(i+1,bv.count());
+            assertEquals(i + 1, bv.count());
         }
 
         bv = new BitVector(n);
         // test count when setting then clearing bits
-        for(int i=0;i<bv.size();i++) {
+        for (int i = 0; i < bv.size(); i++) {
             assertFalse(bv.get(i));
-            assertEquals(0,bv.count());
+            assertEquals(0, bv.count());
             bv.set(i);
             assertTrue(bv.get(i));
-            assertEquals(1,bv.count());
+            assertEquals(1, bv.count());
             bv.clear(i);
             assertFalse(bv.get(i));
-            assertEquals(0,bv.count());
+            assertEquals(0, bv.count());
         }
     }
 
@@ -136,20 +135,20 @@ public class TestBitVector extends LuceneTestCase
     }
 
     private void doTestWriteRead(int n) throws Exception {
-        MockDirectoryWrapper d = new  MockDirectoryWrapper(random, new RAMDirectory());
+        MockDirectoryWrapper d = new MockDirectoryWrapper(random, new RAMDirectory());
         d.setPreventDoubleWrite(false);
         BitVector bv = new BitVector(n);
         // test count when incrementally setting bits
-        for(int i=0;i<bv.size();i++) {
+        for (int i = 0; i < bv.size(); i++) {
             assertFalse(bv.get(i));
-            assertEquals(i,bv.count());
+            assertEquals(i, bv.count());
             bv.set(i);
             assertTrue(bv.get(i));
-            assertEquals(i+1,bv.count());
+            assertEquals(i + 1, bv.count());
             bv.write(d, "TESTBV");
             BitVector compare = new BitVector(d, "TESTBV");
             // compare bit vectors with bits set incrementally
-            assertTrue(doCompare(bv,compare));
+            assertTrue(doCompare(bv, compare));
         }
     }
 
@@ -157,43 +156,44 @@ public class TestBitVector extends LuceneTestCase
      * Test r/w when size/count cause switching between bit-set and d-gaps file formats.  
      */
     public void testDgaps() throws IOException {
-      doTestDgaps(1,0,1);
-      doTestDgaps(10,0,1);
-      doTestDgaps(100,0,1);
-      doTestDgaps(1000,4,7);
-      doTestDgaps(10000,40,43);
-      doTestDgaps(100000,415,418);
-      doTestDgaps(1000000,3123,3126);
+        doTestDgaps(1, 0, 1);
+        doTestDgaps(10, 0, 1);
+        doTestDgaps(100, 0, 1);
+        doTestDgaps(1000, 4, 7);
+        doTestDgaps(10000, 40, 43);
+        doTestDgaps(100000, 415, 418);
+        doTestDgaps(1000000, 3123, 3126);
     }
-    
+
     private void doTestDgaps(int size, int count1, int count2) throws IOException {
-      MockDirectoryWrapper d = new  MockDirectoryWrapper(random, new RAMDirectory());
-      d.setPreventDoubleWrite(false);
-      BitVector bv = new BitVector(size);
-      for (int i=0; i<count1; i++) {
-        bv.set(i);
-        assertEquals(i+1,bv.count());
-      }
-      bv.write(d, "TESTBV");
-      // gradually increase number of set bits
-      for (int i=count1; i<count2; i++) {
-        BitVector bv2 = new BitVector(d, "TESTBV");
-        assertTrue(doCompare(bv,bv2));
-        bv = bv2;
-        bv.set(i);
-        assertEquals(i+1,bv.count());
+        MockDirectoryWrapper d = new MockDirectoryWrapper(random, new RAMDirectory());
+        d.setPreventDoubleWrite(false);
+        BitVector bv = new BitVector(size);
+        for (int i = 0; i < count1; i++) {
+            bv.set(i);
+            assertEquals(i + 1, bv.count());
+        }
         bv.write(d, "TESTBV");
-      }
-      // now start decreasing number of set bits
-      for (int i=count2-1; i>=count1; i--) {
-        BitVector bv2 = new BitVector(d, "TESTBV");
-        assertTrue(doCompare(bv,bv2));
-        bv = bv2;
-        bv.clear(i);
-        assertEquals(i,bv.count());
-        bv.write(d, "TESTBV");
-      }
+        // gradually increase number of set bits
+        for (int i = count1; i < count2; i++) {
+            BitVector bv2 = new BitVector(d, "TESTBV");
+            assertTrue(doCompare(bv, bv2));
+            bv = bv2;
+            bv.set(i);
+            assertEquals(i + 1, bv.count());
+            bv.write(d, "TESTBV");
+        }
+        // now start decreasing number of set bits
+        for (int i = count2 - 1; i >= count1; i--) {
+            BitVector bv2 = new BitVector(d, "TESTBV");
+            assertTrue(doCompare(bv, bv2));
+            bv = bv2;
+            bv.clear(i);
+            assertEquals(i, bv.count());
+            bv.write(d, "TESTBV");
+        }
     }
+
     /**
      * Compare two BitVectors.
      * This should really be an equals method on the BitVector itself.
@@ -202,9 +202,9 @@ public class TestBitVector extends LuceneTestCase
      */
     private boolean doCompare(BitVector bv, BitVector compare) {
         boolean equal = true;
-        for(int i=0;i<bv.size();i++) {
+        for (int i = 0; i < bv.size(); i++) {
             // bits must be equal
-            if(bv.get(i)!=compare.get(i)) {
+            if (bv.get(i) != compare.get(i)) {
                 equal = false;
                 break;
             }

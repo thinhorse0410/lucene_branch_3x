@@ -7,9 +7,9 @@ package org.apache.lucene.index;
  * The ASF licenses this file to You under the Apache License, Version 2.0
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,90 +17,90 @@ package org.apache.lucene.index;
  * limitations under the License.
  */
 
-import java.io.IOException;
-import java.util.Random;
-
-import org.apache.lucene.util.LuceneTestCase;
-import org.apache.lucene.store.Directory;
-import org.apache.lucene.store.MockDirectoryWrapper;
-import org.apache.lucene.store.NoLockFactory;
 import org.apache.lucene.analysis.MockAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
+import org.apache.lucene.store.Directory;
+import org.apache.lucene.store.MockDirectoryWrapper;
+import org.apache.lucene.store.NoLockFactory;
+import org.apache.lucene.util.LuceneTestCase;
+
+import java.io.IOException;
+import java.util.Random;
 
 public class TestCrash extends LuceneTestCase {
 
-  private IndexWriter initIndex(Random random, boolean initialCommit) throws IOException {
-    return initIndex(random, newDirectory(random), initialCommit);
-  }
-
-  private IndexWriter initIndex(Random random, MockDirectoryWrapper dir, boolean initialCommit) throws IOException {
-    dir.setLockFactory(NoLockFactory.getNoLockFactory());
-
-    IndexWriter writer = new IndexWriter(dir, newIndexWriterConfig(
-        TEST_VERSION_CURRENT, new MockAnalyzer(random)).setMaxBufferedDocs(10)
-        .setMergeScheduler(new ConcurrentMergeScheduler())
-        .setMergePolicy(newLogMergePolicy()));
-    ((ConcurrentMergeScheduler) writer.getConfig().getMergeScheduler()).setSuppressExceptions();
-    if (initialCommit) {
-      writer.commit();
+    private IndexWriter initIndex(Random random, boolean initialCommit) throws IOException {
+        return initIndex(random, newDirectory(random), initialCommit);
     }
-    
-    Document doc = new Document();
-    doc.add(newField("content", "aaa", Field.Store.YES, Field.Index.ANALYZED));
-    doc.add(newField("id", "0", Field.Store.YES, Field.Index.ANALYZED));
-    for(int i=0;i<157;i++)
-      writer.addDocument(doc);
 
-    return writer;
-  }
+    private IndexWriter initIndex(Random random, MockDirectoryWrapper dir, boolean initialCommit) throws IOException {
+        dir.setLockFactory(NoLockFactory.getNoLockFactory());
 
-  private void crash(final IndexWriter writer) throws IOException {
-    final MockDirectoryWrapper dir = (MockDirectoryWrapper) writer.getDirectory();
-    ConcurrentMergeScheduler cms = (ConcurrentMergeScheduler) writer.getConfig().getMergeScheduler();
-    cms.sync();
-    dir.crash();
-    cms.sync();
-    dir.clearCrash();
-  }
+        IndexWriter writer = new IndexWriter(dir, newIndexWriterConfig(
+                TEST_VERSION_CURRENT, new MockAnalyzer(random)).setMaxBufferedDocs(10)
+                .setMergeScheduler(new ConcurrentMergeScheduler())
+                .setMergePolicy(newLogMergePolicy()));
+        ((ConcurrentMergeScheduler) writer.getConfig().getMergeScheduler()).setSuppressExceptions();
+        if (initialCommit) {
+            writer.commit();
+        }
 
-  public void testCrashWhileIndexing() throws IOException {
-    // This test relies on being able to open a reader before any commit
-    // happened, so we must create an initial commit just to allow that, but
-    // before any documents were added.
-    IndexWriter writer = initIndex(random, true);
-    Directory dir = writer.getDirectory();
-    crash(writer);
-    IndexReader reader = IndexReader.open(dir, false);
-    assertTrue(reader.numDocs() < 157);
-    reader.close();
-    dir.close();
-  }
+        Document doc = new Document();
+        doc.add(newField("content", "aaa", Field.Store.YES, Field.Index.ANALYZED));
+        doc.add(newField("id", "0", Field.Store.YES, Field.Index.ANALYZED));
+        for (int i = 0; i < 157; i++)
+            writer.addDocument(doc);
 
-  public void testWriterAfterCrash() throws IOException {
-    // This test relies on being able to open a reader before any commit
-    // happened, so we must create an initial commit just to allow that, but
-    // before any documents were added.
-    IndexWriter writer = initIndex(random, true);
-    MockDirectoryWrapper dir = (MockDirectoryWrapper) writer.getDirectory();
-    dir.setPreventDoubleWrite(false);
-    crash(writer);
-    writer = initIndex(random, dir, false);
-    writer.close();
+        return writer;
+    }
 
-    IndexReader reader = IndexReader.open(dir, false);
-    assertTrue(reader.numDocs() < 314);
-    reader.close();
-    dir.close();
-  }
+    private void crash(final IndexWriter writer) throws IOException {
+        final MockDirectoryWrapper dir = (MockDirectoryWrapper) writer.getDirectory();
+        ConcurrentMergeScheduler cms = (ConcurrentMergeScheduler) writer.getConfig().getMergeScheduler();
+        cms.sync();
+        dir.crash();
+        cms.sync();
+        dir.clearCrash();
+    }
 
-  public void testCrashAfterReopen() throws IOException {
-    IndexWriter writer = initIndex(random, false);
-    MockDirectoryWrapper dir = (MockDirectoryWrapper) writer.getDirectory();
-    writer.close();
-    writer = initIndex(random, dir, false);
-    assertEquals(314, writer.maxDoc());
-    crash(writer);
+    public void testCrashWhileIndexing() throws IOException {
+        // This test relies on being able to open a reader before any commit
+        // happened, so we must create an initial commit just to allow that, but
+        // before any documents were added.
+        IndexWriter writer = initIndex(random, true);
+        Directory dir = writer.getDirectory();
+        crash(writer);
+        IndexReader reader = IndexReader.open(dir, false);
+        assertTrue(reader.numDocs() < 157);
+        reader.close();
+        dir.close();
+    }
+
+    public void testWriterAfterCrash() throws IOException {
+        // This test relies on being able to open a reader before any commit
+        // happened, so we must create an initial commit just to allow that, but
+        // before any documents were added.
+        IndexWriter writer = initIndex(random, true);
+        MockDirectoryWrapper dir = (MockDirectoryWrapper) writer.getDirectory();
+        dir.setPreventDoubleWrite(false);
+        crash(writer);
+        writer = initIndex(random, dir, false);
+        writer.close();
+
+        IndexReader reader = IndexReader.open(dir, false);
+        assertTrue(reader.numDocs() < 314);
+        reader.close();
+        dir.close();
+    }
+
+    public void testCrashAfterReopen() throws IOException {
+        IndexWriter writer = initIndex(random, false);
+        MockDirectoryWrapper dir = (MockDirectoryWrapper) writer.getDirectory();
+        writer.close();
+        writer = initIndex(random, dir, false);
+        assertEquals(314, writer.maxDoc());
+        crash(writer);
 
     /*
     System.out.println("\n\nTEST: open reader");
@@ -111,41 +111,19 @@ public class TestCrash extends LuceneTestCase {
     dir.fileLength(l[i]) + " bytes");
     */
 
-    IndexReader reader = IndexReader.open(dir, false);
-    assertTrue(reader.numDocs() >= 157);
-    reader.close();
-    dir.close();
-  }
+        IndexReader reader = IndexReader.open(dir, false);
+        assertTrue(reader.numDocs() >= 157);
+        reader.close();
+        dir.close();
+    }
 
-  public void testCrashAfterClose() throws IOException {
-    
-    IndexWriter writer = initIndex(random, false);
-    MockDirectoryWrapper dir = (MockDirectoryWrapper) writer.getDirectory();
+    public void testCrashAfterClose() throws IOException {
 
-    writer.close();
-    dir.crash();
+        IndexWriter writer = initIndex(random, false);
+        MockDirectoryWrapper dir = (MockDirectoryWrapper) writer.getDirectory();
 
-    /*
-    String[] l = dir.list();
-    Arrays.sort(l);
-    for(int i=0;i<l.length;i++)
-      System.out.println("file " + i + " = " + l[i] + " " + dir.fileLength(l[i]) + " bytes");
-    */
-
-    IndexReader reader = IndexReader.open(dir, false);
-    assertEquals(157, reader.numDocs());
-    reader.close();
-    dir.close();
-  }
-
-  public void testCrashAfterCloseNoWait() throws IOException {
-    
-    IndexWriter writer = initIndex(random, false);
-    MockDirectoryWrapper dir = (MockDirectoryWrapper) writer.getDirectory();
-
-    writer.close(false);
-
-    dir.crash();
+        writer.close();
+        dir.crash();
 
     /*
     String[] l = dir.list();
@@ -153,47 +131,21 @@ public class TestCrash extends LuceneTestCase {
     for(int i=0;i<l.length;i++)
       System.out.println("file " + i + " = " + l[i] + " " + dir.fileLength(l[i]) + " bytes");
     */
-    IndexReader reader = IndexReader.open(dir, false);
-    assertEquals(157, reader.numDocs());
-    reader.close();
-    dir.close();
-  }
 
-  public void testCrashReaderDeletes() throws IOException {
-    
-    IndexWriter writer = initIndex(random, false);
-    MockDirectoryWrapper dir = (MockDirectoryWrapper) writer.getDirectory();
+        IndexReader reader = IndexReader.open(dir, false);
+        assertEquals(157, reader.numDocs());
+        reader.close();
+        dir.close();
+    }
 
-    writer.close(false);
-    IndexReader reader = IndexReader.open(dir, false);
-    reader.deleteDocument(3);
+    public void testCrashAfterCloseNoWait() throws IOException {
 
-    dir.crash();
+        IndexWriter writer = initIndex(random, false);
+        MockDirectoryWrapper dir = (MockDirectoryWrapper) writer.getDirectory();
 
-    /*
-    String[] l = dir.list();
-    Arrays.sort(l);
-    for(int i=0;i<l.length;i++)
-      System.out.println("file " + i + " = " + l[i] + " " + dir.fileLength(l[i]) + " bytes");
-    */
-    reader = IndexReader.open(dir, false);
-    assertEquals(157, reader.numDocs());
-    reader.close();
-    dir.clearCrash();
-    dir.close();
-  }
+        writer.close(false);
 
-  public void testCrashReaderDeletesAfterClose() throws IOException {
-    
-    IndexWriter writer = initIndex(random, false);
-    MockDirectoryWrapper dir = (MockDirectoryWrapper) writer.getDirectory();
-
-    writer.close(false);
-    IndexReader reader = IndexReader.open(dir, false);
-    reader.deleteDocument(3);
-    reader.close();
-
-    dir.crash();
+        dir.crash();
 
     /*
     String[] l = dir.list();
@@ -201,9 +153,57 @@ public class TestCrash extends LuceneTestCase {
     for(int i=0;i<l.length;i++)
       System.out.println("file " + i + " = " + l[i] + " " + dir.fileLength(l[i]) + " bytes");
     */
-    reader = IndexReader.open(dir, false);
-    assertEquals(156, reader.numDocs());
-    reader.close();
-    dir.close();
-  }
+        IndexReader reader = IndexReader.open(dir, false);
+        assertEquals(157, reader.numDocs());
+        reader.close();
+        dir.close();
+    }
+
+    public void testCrashReaderDeletes() throws IOException {
+
+        IndexWriter writer = initIndex(random, false);
+        MockDirectoryWrapper dir = (MockDirectoryWrapper) writer.getDirectory();
+
+        writer.close(false);
+        IndexReader reader = IndexReader.open(dir, false);
+        reader.deleteDocument(3);
+
+        dir.crash();
+
+    /*
+    String[] l = dir.list();
+    Arrays.sort(l);
+    for(int i=0;i<l.length;i++)
+      System.out.println("file " + i + " = " + l[i] + " " + dir.fileLength(l[i]) + " bytes");
+    */
+        reader = IndexReader.open(dir, false);
+        assertEquals(157, reader.numDocs());
+        reader.close();
+        dir.clearCrash();
+        dir.close();
+    }
+
+    public void testCrashReaderDeletesAfterClose() throws IOException {
+
+        IndexWriter writer = initIndex(random, false);
+        MockDirectoryWrapper dir = (MockDirectoryWrapper) writer.getDirectory();
+
+        writer.close(false);
+        IndexReader reader = IndexReader.open(dir, false);
+        reader.deleteDocument(3);
+        reader.close();
+
+        dir.crash();
+
+    /*
+    String[] l = dir.list();
+    Arrays.sort(l);
+    for(int i=0;i<l.length;i++)
+      System.out.println("file " + i + " = " + l[i] + " " + dir.fileLength(l[i]) + " bytes");
+    */
+        reader = IndexReader.open(dir, false);
+        assertEquals(156, reader.numDocs());
+        reader.close();
+        dir.close();
+    }
 }

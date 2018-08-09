@@ -7,25 +7,15 @@ package org.apache.lucene.index;
  * The ASF licenses this file to You under the Apache License, Version 2.0
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-
-import java.util.LinkedList;
-import java.util.Collection;
-
 
 import org.apache.lucene.analysis.MockAnalyzer;
 import org.apache.lucene.document.Document;
@@ -34,6 +24,10 @@ import org.apache.lucene.index.IndexWriterConfig.OpenMode;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.util.LuceneTestCase;
 import org.apache.lucene.util._TestUtil;
+
+import java.io.*;
+import java.util.Collection;
+import java.util.LinkedList;
 
 /** JUnit adaptation of an older test case DocTest. */
 public class TestDoc extends LuceneTestCase {
@@ -59,11 +53,11 @@ public class TestDoc extends LuceneTestCase {
 
         files = new LinkedList<File>();
         files.add(createOutput("test.txt",
-            "This is the first test file"
+                "This is the first test file"
         ));
 
         files.add(createOutput("test2.txt",
-            "This is the second test file"
+                "This is the second test file"
         ));
     }
 
@@ -96,146 +90,145 @@ public class TestDoc extends LuceneTestCase {
      *        assert various things about the segment.
      */
     public void testIndexAndMerge() throws Exception {
-      StringWriter sw = new StringWriter();
-      PrintWriter out = new PrintWriter(sw, true);
-      
-      Directory directory = newFSDirectory(indexDir, null);
-      IndexWriter writer = new IndexWriter(
-          directory,
-          newIndexWriterConfig(TEST_VERSION_CURRENT, new MockAnalyzer(random)).
-              setOpenMode(OpenMode.CREATE).
-              setMaxBufferedDocs(-1).
-              setMergePolicy(newLogMergePolicy(10))
-      );
+        StringWriter sw = new StringWriter();
+        PrintWriter out = new PrintWriter(sw, true);
 
-      SegmentInfo si1 = indexDoc(writer, "test.txt");
-      printSegment(out, si1);
+        Directory directory = newFSDirectory(indexDir, null);
+        IndexWriter writer = new IndexWriter(
+                directory,
+                newIndexWriterConfig(TEST_VERSION_CURRENT, new MockAnalyzer(random)).
+                        setOpenMode(OpenMode.CREATE).
+                        setMaxBufferedDocs(-1).
+                        setMergePolicy(newLogMergePolicy(10))
+        );
 
-      SegmentInfo si2 = indexDoc(writer, "test2.txt");
-      printSegment(out, si2);
-      writer.close();
+        SegmentInfo si1 = indexDoc(writer, "test.txt");
+        printSegment(out, si1);
 
-      SegmentInfo siMerge = merge(si1, si2, "merge", false);
-      printSegment(out, siMerge);
+        SegmentInfo si2 = indexDoc(writer, "test2.txt");
+        printSegment(out, si2);
+        writer.close();
 
-      SegmentInfo siMerge2 = merge(si1, si2, "merge2", false);
-      printSegment(out, siMerge2);
+        SegmentInfo siMerge = merge(si1, si2, "merge", false);
+        printSegment(out, siMerge);
 
-      SegmentInfo siMerge3 = merge(siMerge, siMerge2, "merge3", false);
-      printSegment(out, siMerge3);
-      
-      directory.close();
-      out.close();
-      sw.close();
+        SegmentInfo siMerge2 = merge(si1, si2, "merge2", false);
+        printSegment(out, siMerge2);
 
-      String multiFileOutput = sw.getBuffer().toString();
-      //System.out.println(multiFileOutput);
+        SegmentInfo siMerge3 = merge(siMerge, siMerge2, "merge3", false);
+        printSegment(out, siMerge3);
 
-      sw = new StringWriter();
-      out = new PrintWriter(sw, true);
+        directory.close();
+        out.close();
+        sw.close();
 
-      directory = newFSDirectory(indexDir, null);
-      writer = new IndexWriter(
-          directory,
-          newIndexWriterConfig(TEST_VERSION_CURRENT, new MockAnalyzer(random)).
-              setOpenMode(OpenMode.CREATE).
-              setMaxBufferedDocs(-1).
-              setMergePolicy(newLogMergePolicy(10))
-      );
+        String multiFileOutput = sw.getBuffer().toString();
+        //System.out.println(multiFileOutput);
 
-      si1 = indexDoc(writer, "test.txt");
-      printSegment(out, si1);
+        sw = new StringWriter();
+        out = new PrintWriter(sw, true);
 
-      si2 = indexDoc(writer, "test2.txt");
-      printSegment(out, si2);
-      writer.close();
+        directory = newFSDirectory(indexDir, null);
+        writer = new IndexWriter(
+                directory,
+                newIndexWriterConfig(TEST_VERSION_CURRENT, new MockAnalyzer(random)).
+                        setOpenMode(OpenMode.CREATE).
+                        setMaxBufferedDocs(-1).
+                        setMergePolicy(newLogMergePolicy(10))
+        );
 
-      siMerge = merge(si1, si2, "merge", true);
-      printSegment(out, siMerge);
+        si1 = indexDoc(writer, "test.txt");
+        printSegment(out, si1);
 
-      siMerge2 = merge(si1, si2, "merge2", true);
-      printSegment(out, siMerge2);
+        si2 = indexDoc(writer, "test2.txt");
+        printSegment(out, si2);
+        writer.close();
 
-      siMerge3 = merge(siMerge, siMerge2, "merge3", true);
-      printSegment(out, siMerge3);
-      
-      directory.close();
-      out.close();
-      sw.close();
-      String singleFileOutput = sw.getBuffer().toString();
+        siMerge = merge(si1, si2, "merge", true);
+        printSegment(out, siMerge);
 
-      assertEquals(multiFileOutput, singleFileOutput);
-   }
+        siMerge2 = merge(si1, si2, "merge2", true);
+        printSegment(out, siMerge2);
 
-   private SegmentInfo indexDoc(IndexWriter writer, String fileName)
-   throws Exception
-   {
-      File file = new File(workDir, fileName);
-      Document doc = new Document();
-      doc.add(new Field("contents", new FileReader(file)));
-      writer.addDocument(doc);
-      writer.commit();
-      return writer.newestSegment();
-   }
+        siMerge3 = merge(siMerge, siMerge2, "merge3", true);
+        printSegment(out, siMerge3);
 
+        directory.close();
+        out.close();
+        sw.close();
+        String singleFileOutput = sw.getBuffer().toString();
 
-   private SegmentInfo merge(SegmentInfo si1, SegmentInfo si2, String merged, boolean useCompoundFile)
-   throws Exception {
-      SegmentReader r1 = SegmentReader.get(true, si1, IndexReader.DEFAULT_TERMS_INDEX_DIVISOR);
-      SegmentReader r2 = SegmentReader.get(true, si2, IndexReader.DEFAULT_TERMS_INDEX_DIVISOR);
+        assertEquals(multiFileOutput, singleFileOutput);
+    }
 
-      SegmentMerger merger = new SegmentMerger(si1.dir, IndexWriterConfig.DEFAULT_TERM_INDEX_INTERVAL, merged, null, null, new FieldInfos());
-
-      merger.add(r1);
-      merger.add(r2);
-      merger.merge();
-      r1.close();
-      r2.close();
-      
-      final SegmentInfo info = new SegmentInfo(merged, si1.docCount + si2.docCount, si1.dir,
-                                               false, true,
-                                               merger.fieldInfos().hasProx(),
-                                               merger.fieldInfos().hasVectors());
-      
-      if (useCompoundFile) {
-        Collection<String> filesToDelete = merger.createCompoundFile(merged + ".cfs", info);
-        info.setUseCompoundFile(true);
-        for (final String fileToDelete : filesToDelete) 
-          si1.dir.deleteFile(fileToDelete);
-      }
-
-      return info;
-   }
+    private SegmentInfo indexDoc(IndexWriter writer, String fileName)
+            throws Exception {
+        File file = new File(workDir, fileName);
+        Document doc = new Document();
+        doc.add(new Field("contents", new FileReader(file)));
+        writer.addDocument(doc);
+        writer.commit();
+        return writer.newestSegment();
+    }
 
 
-   private void printSegment(PrintWriter out, SegmentInfo si)
-   throws Exception {
-      SegmentReader reader = SegmentReader.get(true, si, IndexReader.DEFAULT_TERMS_INDEX_DIVISOR);
+    private SegmentInfo merge(SegmentInfo si1, SegmentInfo si2, String merged, boolean useCompoundFile)
+            throws Exception {
+        SegmentReader r1 = SegmentReader.get(true, si1, IndexReader.DEFAULT_TERMS_INDEX_DIVISOR);
+        SegmentReader r2 = SegmentReader.get(true, si2, IndexReader.DEFAULT_TERMS_INDEX_DIVISOR);
 
-      for (int i = 0; i < reader.numDocs(); i++)
-        out.println(reader.document(i));
+        SegmentMerger merger = new SegmentMerger(si1.dir, IndexWriterConfig.DEFAULT_TERM_INDEX_INTERVAL, merged, null, null, new FieldInfos());
 
-      TermEnum tis = reader.terms();
-      while (tis.next()) {
-        out.print(tis.term());
-        out.println(" DF=" + tis.docFreq());
+        merger.add(r1);
+        merger.add(r2);
+        merger.merge();
+        r1.close();
+        r2.close();
 
-        TermPositions positions = reader.termPositions(tis.term());
-        try {
-          while (positions.next()) {
-            out.print(" doc=" + positions.doc());
-            out.print(" TF=" + positions.freq());
-            out.print(" pos=");
-            out.print(positions.nextPosition());
-            for (int j = 1; j < positions.freq(); j++)
-              out.print("," + positions.nextPosition());
-            out.println("");
-          }
-        } finally {
-          positions.close();
+        final SegmentInfo info = new SegmentInfo(merged, si1.docCount + si2.docCount, si1.dir,
+                false, true,
+                merger.fieldInfos().hasProx(),
+                merger.fieldInfos().hasVectors());
+
+        if (useCompoundFile) {
+            Collection<String> filesToDelete = merger.createCompoundFile(merged + ".cfs", info);
+            info.setUseCompoundFile(true);
+            for (final String fileToDelete : filesToDelete)
+                si1.dir.deleteFile(fileToDelete);
         }
-      }
-      tis.close();
-      reader.close();
+
+        return info;
+    }
+
+
+    private void printSegment(PrintWriter out, SegmentInfo si)
+            throws Exception {
+        SegmentReader reader = SegmentReader.get(true, si, IndexReader.DEFAULT_TERMS_INDEX_DIVISOR);
+
+        for (int i = 0; i < reader.numDocs(); i++)
+            out.println(reader.document(i));
+
+        TermEnum tis = reader.terms();
+        while (tis.next()) {
+            out.print(tis.term());
+            out.println(" DF=" + tis.docFreq());
+
+            TermPositions positions = reader.termPositions(tis.term());
+            try {
+                while (positions.next()) {
+                    out.print(" doc=" + positions.doc());
+                    out.print(" TF=" + positions.freq());
+                    out.print(" pos=");
+                    out.print(positions.nextPosition());
+                    for (int j = 1; j < positions.freq(); j++)
+                        out.print("," + positions.nextPosition());
+                    out.println("");
+                }
+            } finally {
+                positions.close();
+            }
+        }
+        tis.close();
+        reader.close();
     }
 }
