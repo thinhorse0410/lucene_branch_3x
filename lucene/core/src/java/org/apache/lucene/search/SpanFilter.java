@@ -1,13 +1,13 @@
 package org.apache.lucene.search;
 /**
  * Copyright 2007 The Apache Software Foundation
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -27,12 +27,12 @@ import java.io.IOException;
  and then you entered a new SpanQuery containing bar, you could not only filter by the word foo, but you could
  then compare position information for post processing.
  */
-public abstract class SpanFilter extends Filter{
-  /** Returns a SpanFilterResult with true for documents which should be permitted in
-    search results, and false for those that should not and Spans for where the true docs match.
-   * @param reader The {@link org.apache.lucene.index.IndexReader} to load position and DocIdSet information from
-   * @return A {@link SpanFilterResult}
-   * @throws java.io.IOException if there was an issue accessing the necessary information
-   * */
-  public abstract SpanFilterResult bitSpans(IndexReader reader) throws IOException;
+public abstract class SpanFilter extends Filter {
+    /** Returns a SpanFilterResult with true for documents which should be permitted in
+     search results, and false for those that should not and Spans for where the true docs match.
+     * @param reader The {@link org.apache.lucene.index.IndexReader} to load position and DocIdSet information from
+     * @return A {@link SpanFilterResult}
+     * @throws java.io.IOException if there was an issue accessing the necessary information
+     * */
+    public abstract SpanFilterResult bitSpans(IndexReader reader) throws IOException;
 }

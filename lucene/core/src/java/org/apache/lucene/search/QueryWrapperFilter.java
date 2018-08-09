@@ -7,9 +7,9 @@ package org.apache.lucene.search;
  * The ASF licenses this file to You under the Apache License, Version 2.0
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,12 +17,11 @@ package org.apache.lucene.search;
  * limitations under the License.
  */
 
-import java.io.IOException;
-
-
 import org.apache.lucene.index.IndexReader;
 
-/** 
+import java.io.IOException;
+
+/**
  * Constrains search results to only match those which also match a provided
  * query.  
  *
@@ -33,42 +32,45 @@ import org.apache.lucene.index.IndexReader;
  * once per day.
  */
 public class QueryWrapperFilter extends Filter {
-  private Query query;
+    private Query query;
 
-  /** Constructs a filter which only matches documents matching
-   * <code>query</code>.
-   */
-  public QueryWrapperFilter(Query query) {
-    this.query = query;
-  }
+    /** Constructs a filter which only matches documents matching
+     * <code>query</code>.
+     */
+    public QueryWrapperFilter(Query query) {
+        this.query = query;
+    }
 
-  @Override
-  public DocIdSet getDocIdSet(final IndexReader reader) throws IOException {
-    final Weight weight = new IndexSearcher(reader).createNormalizedWeight(query);
-    return new DocIdSet() {
-      @Override
-      public DocIdSetIterator iterator() throws IOException {
-        return weight.scorer(reader, true, false);
-      }
-      @Override
-      public boolean isCacheable() { return false; }
-    };
-  }
+    @Override
+    public DocIdSet getDocIdSet(final IndexReader reader) throws IOException {
+        final Weight weight = new IndexSearcher(reader).createNormalizedWeight(query);
+        return new DocIdSet() {
+            @Override
+            public DocIdSetIterator iterator() throws IOException {
+                return weight.scorer(reader, true, false);
+            }
 
-  @Override
-  public String toString() {
-    return "QueryWrapperFilter(" + query + ")";
-  }
+            @Override
+            public boolean isCacheable() {
+                return false;
+            }
+        };
+    }
 
-  @Override
-  public boolean equals(Object o) {
-    if (!(o instanceof QueryWrapperFilter))
-      return false;
-    return this.query.equals(((QueryWrapperFilter)o).query);
-  }
+    @Override
+    public String toString() {
+        return "QueryWrapperFilter(" + query + ")";
+    }
 
-  @Override
-  public int hashCode() {
-    return query.hashCode() ^ 0x923F64B9;
-  }
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof QueryWrapperFilter))
+            return false;
+        return this.query.equals(((QueryWrapperFilter) o).query);
+    }
+
+    @Override
+    public int hashCode() {
+        return query.hashCode() ^ 0x923F64B9;
+    }
 }

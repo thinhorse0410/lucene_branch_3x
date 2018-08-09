@@ -7,9 +7,9 @@ package org.apache.lucene.search;
  * The ASF licenses this file to You under the Apache License, Version 2.0
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -32,7 +32,7 @@ import java.util.Arrays;
  * rest of your document data).  In other words:
  *
  * <p><code>document.add (new Field ("byNumber", Integer.toString(x), Field.Store.NO, Field.Index.NOT_ANALYZED));</code></p>
- * 
+ *
  *
  * <p><h3>Valid Types of Values</h3>
  *
@@ -54,7 +54,7 @@ import java.util.Arrays;
  * <code>Long.MIN_VALUE</code> and <code>Long.MAX_VALUE</code> inclusive.
  * Documents which should appear first in the sort
  * should have low value integers, later documents high values.
- * 
+ *
  * <p>Float term values should conform to values accepted by
  * {@link Float Float.valueOf(String)} (except that <code>NaN</code>
  * and <code>Infinity</code> are not supported).
@@ -95,87 +95,87 @@ import java.util.Arrays;
  *
  * <p>Created: Feb 12, 2004 10:53:57 AM
  *
- * @since   lucene 1.4
+ * @since lucene 1.4
  */
 public class Sort
-implements Serializable {
+        implements Serializable {
 
-  /**
-   * Represents sorting by computed relevance. Using this sort criteria returns
-   * the same results as calling
-   * {@link Searcher#search(Query,int) Searcher#search()}without a sort criteria,
-   * only with slightly more overhead.
-   */
-  public static final Sort RELEVANCE = new Sort();
+    /**
+     * Represents sorting by computed relevance. Using this sort criteria returns
+     * the same results as calling
+     * {@link Searcher#search(Query, int) Searcher#search()}without a sort criteria,
+     * only with slightly more overhead.
+     */
+    public static final Sort RELEVANCE = new Sort();
 
-  /** Represents sorting by index order. */
-  public static final Sort INDEXORDER = new Sort(SortField.FIELD_DOC);
+    /** Represents sorting by index order. */
+    public static final Sort INDEXORDER = new Sort(SortField.FIELD_DOC);
 
-  // internal representation of the sort criteria
-  SortField[] fields;
+    // internal representation of the sort criteria
+    SortField[] fields;
 
-  /**
-   * Sorts by computed relevance. This is the same sort criteria as calling
-   * {@link Searcher#search(Query,int) Searcher#search()}without a sort criteria,
-   * only with slightly more overhead.
-   */
-  public Sort() {
-    this(SortField.FIELD_SCORE);
-  }
-
-  /** Sorts by the criteria in the given SortField. */
-  public Sort(SortField field) {
-    setSort(field);
-  }
-
-  /** Sorts in succession by the criteria in each SortField. */
-  public Sort(SortField... fields) {
-    setSort(fields);
-  }
-
-  /** Sets the sort to the given criteria. */
-  public void setSort(SortField field) {
-    this.fields = new SortField[] { field };
-  }
-
-  /** Sets the sort to the given criteria in succession. */
-  public void setSort(SortField... fields) {
-    this.fields = fields;
-  }
-  
-  /**
-   * Representation of the sort criteria.
-   * @return Array of SortField objects used in this sort criteria
-   */
-  public SortField[] getSort() {
-    return fields;
-  }
-
-  @Override
-  public String toString() {
-    StringBuilder buffer = new StringBuilder();
-
-    for (int i = 0; i < fields.length; i++) {
-      buffer.append(fields[i].toString());
-      if ((i+1) < fields.length)
-        buffer.append(',');
+    /**
+     * Sorts by computed relevance. This is the same sort criteria as calling
+     * {@link Searcher#search(Query, int) Searcher#search()}without a sort criteria,
+     * only with slightly more overhead.
+     */
+    public Sort() {
+        this(SortField.FIELD_SCORE);
     }
 
-    return buffer.toString();
-  }
+    /** Sorts by the criteria in the given SortField. */
+    public Sort(SortField field) {
+        setSort(field);
+    }
 
-  /** Returns true if <code>o</code> is equal to this. */
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) return true;
-    if (!(o instanceof Sort)) return false;
-    final Sort other = (Sort)o;
-    return Arrays.equals(this.fields, other.fields);
-  }
+    /** Sorts in succession by the criteria in each SortField. */
+    public Sort(SortField... fields) {
+        setSort(fields);
+    }
 
-  /** Returns a hash code value for this object. */
-  @Override
-  public int hashCode() {
-    return 0x45aaf665 + Arrays.hashCode(fields);
-  }
+    /** Sets the sort to the given criteria. */
+    public void setSort(SortField field) {
+        this.fields = new SortField[]{field};
+    }
+
+    /** Sets the sort to the given criteria in succession. */
+    public void setSort(SortField... fields) {
+        this.fields = fields;
+    }
+
+    /**
+     * Representation of the sort criteria.
+     * @return Array of SortField objects used in this sort criteria
+     */
+    public SortField[] getSort() {
+        return fields;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder buffer = new StringBuilder();
+
+        for (int i = 0; i < fields.length; i++) {
+            buffer.append(fields[i].toString());
+            if ((i + 1) < fields.length)
+                buffer.append(',');
+        }
+
+        return buffer.toString();
+    }
+
+    /** Returns true if <code>o</code> is equal to this. */
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Sort)) return false;
+        final Sort other = (Sort) o;
+        return Arrays.equals(this.fields, other.fields);
+    }
+
+    /** Returns a hash code value for this object. */
+    @Override
+    public int hashCode() {
+        return 0x45aaf665 + Arrays.hashCode(fields);
+    }
 }

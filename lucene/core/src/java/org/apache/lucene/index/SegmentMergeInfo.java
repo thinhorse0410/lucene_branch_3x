@@ -7,9 +7,9 @@ package org.apache.lucene.index;
  * The ASF licenses this file to You under the Apache License, Version 2.0
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,75 +17,75 @@ package org.apache.lucene.index;
  * limitations under the License.
  */
 
-import java.io.IOException;
-
 import org.apache.lucene.index.PayloadProcessorProvider.ReaderPayloadProcessor;
 
+import java.io.IOException;
+
 final class SegmentMergeInfo {
-  Term term;
-  int base;
-  int ord;  // the position of the segment in a MultiReader
-  TermEnum termEnum;
-  IndexReader reader;
-  int delCount;
-  private TermPositions postings;  // use getPositions()
-  private int[] docMap;  // use getDocMap()
-  ReaderPayloadProcessor readerPayloadProcessor;
-  
-  SegmentMergeInfo(int b, TermEnum te, IndexReader r)
-    throws IOException {
-    base = b;
-    reader = r;
-    termEnum = te;
-    term = te.term();
-  }
+    Term term;
+    int base;
+    int ord;  // the position of the segment in a MultiReader
+    TermEnum termEnum;
+    IndexReader reader;
+    int delCount;
+    private TermPositions postings;  // use getPositions()
+    private int[] docMap;  // use getDocMap()
+    ReaderPayloadProcessor readerPayloadProcessor;
 
-  // maps around deleted docs
-  int[] getDocMap() {
-    if (docMap == null) {
-      delCount = 0;
-      // build array which maps document numbers around deletions 
-      if (reader.hasDeletions()) {
-        int maxDoc = reader.maxDoc();
-        docMap = new int[maxDoc];
-        int j = 0;
-        for (int i = 0; i < maxDoc; i++) {
-          if (reader.isDeleted(i)) {
-            delCount++;
-            docMap[i] = -1;
-          } else
-            docMap[i] = j++;
+    SegmentMergeInfo(int b, TermEnum te, IndexReader r)
+            throws IOException {
+        base = b;
+        reader = r;
+        termEnum = te;
+        term = te.term();
+    }
+
+    // maps around deleted docs
+    int[] getDocMap() {
+        if (docMap == null) {
+            delCount = 0;
+            // build array which maps document numbers around deletions
+            if (reader.hasDeletions()) {
+                int maxDoc = reader.maxDoc();
+                docMap = new int[maxDoc];
+                int j = 0;
+                for (int i = 0; i < maxDoc; i++) {
+                    if (reader.isDeleted(i)) {
+                        delCount++;
+                        docMap[i] = -1;
+                    } else
+                        docMap[i] = j++;
+                }
+            }
         }
-      }
+        return docMap;
     }
-    return docMap;
-  }
 
-  TermPositions getPositions() throws IOException {
-    if (postings == null) {
-      postings = reader.termPositions();
+    TermPositions getPositions() throws IOException {
+        if (postings == null) {
+            postings = reader.termPositions();
+        }
+        return postings;
     }
-    return postings;
-  }
 
-  final boolean next() throws IOException {
-    if (termEnum.next()) {
-      term = termEnum.term();
-      return true;
-    } else {
-      term = null;
-      return false;
+    final boolean next() throws IOException {
+        if (termEnum.next()) {
+            term = termEnum.term();
+            return true;
+        } else {
+            term = null;
+            return false;
+        }
     }
-  }
 
-  final void close() throws IOException {
-    try {
-      termEnum.close();
-    } finally {
-      if (postings != null) {
-        postings.close();
-      }
+    final void close() throws IOException {
+        try {
+            termEnum.close();
+        } finally {
+            if (postings != null) {
+                postings.close();
+            }
+        }
     }
-  }
 }
 

@@ -7,21 +7,21 @@ package org.apache.lucene.index;
  * The ASF licenses this file to You under the Apache License, Version 2.0
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
-
-import java.util.Collection;
-import java.util.Map;
-import java.io.IOException;
+ */
 
 import org.apache.lucene.store.Directory;
+
+import java.io.IOException;
+import java.util.Collection;
+import java.util.Map;
 
 /**
  * <p>Expert: represents a single commit into an index as seen by the
@@ -39,103 +39,103 @@ import org.apache.lucene.store.Directory;
  * later index commit point would have a larger N.</p>
  *
  * @lucene.experimental
-*/
+ */
 
 public abstract class IndexCommit implements Comparable<IndexCommit> {
 
-  /**
-   * Get the segments file (<code>segments_N</code>) associated 
-   * with this commit point.
-   */
-  public abstract String getSegmentsFileName();
+    /**
+     * Get the segments file (<code>segments_N</code>) associated
+     * with this commit point.
+     */
+    public abstract String getSegmentsFileName();
 
-  /**
-   * Returns all index files referenced by this commit point.
-   */
-  public abstract Collection<String> getFileNames() throws IOException;
+    /**
+     * Returns all index files referenced by this commit point.
+     */
+    public abstract Collection<String> getFileNames() throws IOException;
 
-  /**
-   * Returns the {@link Directory} for the index.
-   */
-  public abstract Directory getDirectory();
-  
-  /**
-   * Delete this commit point.  This only applies when using
-   * the commit point in the context of IndexWriter's
-   * IndexDeletionPolicy.
-   * <p>
-   * Upon calling this, the writer is notified that this commit 
-   * point should be deleted. 
-   * <p>
-   * Decision that a commit-point should be deleted is taken by the {@link IndexDeletionPolicy} in effect
-   * and therefore this should only be called by its {@link IndexDeletionPolicy#onInit onInit()} or 
-   * {@link IndexDeletionPolicy#onCommit onCommit()} methods.
-  */
-  public abstract void delete();
+    /**
+     * Returns the {@link Directory} for the index.
+     */
+    public abstract Directory getDirectory();
 
-  public abstract boolean isDeleted();
+    /**
+     * Delete this commit point.  This only applies when using
+     * the commit point in the context of IndexWriter's
+     * IndexDeletionPolicy.
+     * <p>
+     * Upon calling this, the writer is notified that this commit
+     * point should be deleted.
+     * <p>
+     * Decision that a commit-point should be deleted is taken by the {@link IndexDeletionPolicy} in effect
+     * and therefore this should only be called by its {@link IndexDeletionPolicy#onInit onInit()} or
+     * {@link IndexDeletionPolicy#onCommit onCommit()} methods.
+     */
+    public abstract void delete();
 
-  /** Returns number of segments referenced by this commit. */
-  public abstract int getSegmentCount();
+    public abstract boolean isDeleted();
 
-  /** Two IndexCommits are equal if both their Directory and versions are equal. */
-  @Override
-  public boolean equals(Object other) {
-    if (other instanceof IndexCommit) {
-      IndexCommit otherCommit = (IndexCommit) other;
-      return otherCommit.getDirectory().equals(getDirectory()) && otherCommit.getVersion() == getVersion();
-    } else {
-      return false;
-    }
-  }
+    /** Returns number of segments referenced by this commit. */
+    public abstract int getSegmentCount();
 
-  @Override
-  public int hashCode() {
-    return (int) (getDirectory().hashCode() + getVersion());
-  }
-
-  /** Returns the version for this IndexCommit.  This is the
-   *  same value that {@link IndexReader#getVersion} would
-   *  return if it were opened on this commit.
-   * @deprecated use {@link #getGeneration} instead */
-  @Deprecated
-  public abstract long getVersion();
-
-  /** Returns the generation (the _N in segments_N) for this
-   *  IndexCommit */
-  public abstract long getGeneration();
-
-  /** Convenience method that returns the last modified time
-   *  of the segments_N file corresponding to this index
-   *  commit, equivalent to
-   *  getDirectory().fileModified(getSegmentsFileName()).
-   * @deprecated If you need to track commit time of
-   * an index, you can store it in the commit data (see
-   * {@link IndexWriter#commit(Map)}
-   */
-  @Deprecated
-  public long getTimestamp() throws IOException {
-    return getDirectory().fileModified(getSegmentsFileName());
-  }
-
-  /** Returns userData, previously passed to {@link
-   *  IndexWriter#commit(Map)} for this commit.  Map is
-   *  String -> String. */
-  public abstract Map<String,String> getUserData() throws IOException;
-  
-  public int compareTo(IndexCommit commit) {
-    if (getDirectory() != commit.getDirectory()) {
-      throw new UnsupportedOperationException("cannot compare IndexCommits from different Directory instances");
+    /** Two IndexCommits are equal if both their Directory and versions are equal. */
+    @Override
+    public boolean equals(Object other) {
+        if (other instanceof IndexCommit) {
+            IndexCommit otherCommit = (IndexCommit) other;
+            return otherCommit.getDirectory().equals(getDirectory()) && otherCommit.getVersion() == getVersion();
+        } else {
+            return false;
+        }
     }
 
-    long gen = getGeneration();
-    long comgen = commit.getGeneration();
-    if (gen < comgen) {
-      return -1;
-    } else if (gen > comgen) {
-      return 1;
-    } else {
-      return 0;
+    @Override
+    public int hashCode() {
+        return (int) (getDirectory().hashCode() + getVersion());
     }
-  }
+
+    /** Returns the version for this IndexCommit.  This is the
+     *  same value that {@link IndexReader#getVersion} would
+     *  return if it were opened on this commit.
+     * @deprecated use {@link #getGeneration} instead */
+    @Deprecated
+    public abstract long getVersion();
+
+    /** Returns the generation (the _N in segments_N) for this
+     *  IndexCommit */
+    public abstract long getGeneration();
+
+    /** Convenience method that returns the last modified time
+     *  of the segments_N file corresponding to this index
+     *  commit, equivalent to
+     *  getDirectory().fileModified(getSegmentsFileName()).
+     * @deprecated If you need to track commit time of
+     * an index, you can store it in the commit data (see
+     * {@link IndexWriter#commit(Map)}
+     */
+    @Deprecated
+    public long getTimestamp() throws IOException {
+        return getDirectory().fileModified(getSegmentsFileName());
+    }
+
+    /** Returns userData, previously passed to {@link
+     *  IndexWriter#commit(Map)} for this commit.  Map is
+     *  String -> String. */
+    public abstract Map<String, String> getUserData() throws IOException;
+
+    public int compareTo(IndexCommit commit) {
+        if (getDirectory() != commit.getDirectory()) {
+            throw new UnsupportedOperationException("cannot compare IndexCommits from different Directory instances");
+        }
+
+        long gen = getGeneration();
+        long comgen = commit.getGeneration();
+        if (gen < comgen) {
+            return -1;
+        } else if (gen > comgen) {
+            return 1;
+        } else {
+            return 0;
+        }
+    }
 }

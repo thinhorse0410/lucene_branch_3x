@@ -7,9 +7,9 @@ package org.apache.lucene.index;
  * The ASF licenses this file to You under the Apache License, Version 2.0
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -25,21 +25,21 @@ import org.apache.lucene.document.Fieldable;
 
 final class DocFieldProcessorPerField {
 
-  final DocFieldConsumerPerField consumer;
-  final FieldInfo fieldInfo;
+    final DocFieldConsumerPerField consumer;
+    final FieldInfo fieldInfo;
 
-  DocFieldProcessorPerField next;
-  int lastGen = -1;
+    DocFieldProcessorPerField next;
+    int lastGen = -1;
 
-  int fieldCount;
-  Fieldable[] fields = new Fieldable[1];
+    int fieldCount;
+    Fieldable[] fields = new Fieldable[1];
 
-  public DocFieldProcessorPerField(final DocFieldProcessorPerThread perThread, final FieldInfo fieldInfo) {
-    this.consumer = perThread.consumer.addField(fieldInfo);
-    this.fieldInfo = fieldInfo;
-  }
+    public DocFieldProcessorPerField(final DocFieldProcessorPerThread perThread, final FieldInfo fieldInfo) {
+        this.consumer = perThread.consumer.addField(fieldInfo);
+        this.fieldInfo = fieldInfo;
+    }
 
-  public void abort() {
-    consumer.abort();
-  }
+    public void abort() {
+        consumer.abort();
+    }
 }

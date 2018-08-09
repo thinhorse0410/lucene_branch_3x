@@ -5,9 +5,9 @@
  * The ASF licenses this file to You under the Apache License, Version 2.0
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -50,66 +50,69 @@ import java.io.IOException;
  */
 
 public class OrdFieldSource extends ValueSource {
-  protected String field;
+    protected String field;
 
-  /** 
-   * Constructor for a certain field.
-   * @param field field whose values order is used.  
-   */
-  public OrdFieldSource(String field) {
-    this.field = field;
-  }
+    /**
+     * Constructor for a certain field.
+     * @param field field whose values order is used.
+     */
+    public OrdFieldSource(String field) {
+        this.field = field;
+    }
 
-  /*(non-Javadoc) @see org.apache.lucene.search.function.ValueSource#description() */
-  @Override
-  public String description() {
-    return "ord(" + field + ')';
-  }
+    /*(non-Javadoc) @see org.apache.lucene.search.function.ValueSource#description() */
+    @Override
+    public String description() {
+        return "ord(" + field + ')';
+    }
 
-  /*(non-Javadoc) @see org.apache.lucene.search.function.ValueSource#getValues(org.apache.lucene.index.IndexReader) */
-  @Override
-  public DocValues getValues(IndexReader reader) throws IOException {
-    final int[] arr = FieldCache.DEFAULT.getStringIndex(reader, field).order;
-    return new DocValues() {
-      /*(non-Javadoc) @see org.apache.lucene.search.function.DocValues#floatVal(int) */
-      @Override
-      public float floatVal(int doc) {
-        return arr[doc];
-      }
-      /*(non-Javadoc) @see org.apache.lucene.search.function.DocValues#strVal(int) */
-      @Override
-      public String strVal(int doc) {
-        // the string value of the ordinal, not the string itself
-        return Integer.toString(arr[doc]);
-      }
-      /*(non-Javadoc) @see org.apache.lucene.search.function.DocValues#toString(int) */
-      @Override
-      public String toString(int doc) {
-        return description() + '=' + intVal(doc);
-      }
-      /*(non-Javadoc) @see org.apache.lucene.search.function.DocValues#getInnerArray() */
-      @Override
-      Object getInnerArray() {
-        return arr;
-      }
-    };
-  }
+    /*(non-Javadoc) @see org.apache.lucene.search.function.ValueSource#getValues(org.apache.lucene.index.IndexReader) */
+    @Override
+    public DocValues getValues(IndexReader reader) throws IOException {
+        final int[] arr = FieldCache.DEFAULT.getStringIndex(reader, field).order;
+        return new DocValues() {
+            /*(non-Javadoc) @see org.apache.lucene.search.function.DocValues#floatVal(int) */
+            @Override
+            public float floatVal(int doc) {
+                return arr[doc];
+            }
 
-  /*(non-Javadoc) @see java.lang.Object#equals(java.lang.Object) */
-  @Override
-  public boolean equals(Object o) {
-    if (o == this) return true;
-    if (o == null) return false;
-    if (o.getClass() != OrdFieldSource.class) return false;
-    OrdFieldSource other = (OrdFieldSource)o;
-    return this.field.equals(other.field);
-  }
+            /*(non-Javadoc) @see org.apache.lucene.search.function.DocValues#strVal(int) */
+            @Override
+            public String strVal(int doc) {
+                // the string value of the ordinal, not the string itself
+                return Integer.toString(arr[doc]);
+            }
 
-  private static final int hcode = OrdFieldSource.class.hashCode();
-  
-  /*(non-Javadoc) @see java.lang.Object#hashCode() */
-  @Override
-  public int hashCode() {
-    return hcode + field.hashCode();
-  }
+            /*(non-Javadoc) @see org.apache.lucene.search.function.DocValues#toString(int) */
+            @Override
+            public String toString(int doc) {
+                return description() + '=' + intVal(doc);
+            }
+
+            /*(non-Javadoc) @see org.apache.lucene.search.function.DocValues#getInnerArray() */
+            @Override
+            Object getInnerArray() {
+                return arr;
+            }
+        };
+    }
+
+    /*(non-Javadoc) @see java.lang.Object#equals(java.lang.Object) */
+    @Override
+    public boolean equals(Object o) {
+        if (o == this) return true;
+        if (o == null) return false;
+        if (o.getClass() != OrdFieldSource.class) return false;
+        OrdFieldSource other = (OrdFieldSource) o;
+        return this.field.equals(other.field);
+    }
+
+    private static final int hcode = OrdFieldSource.class.hashCode();
+
+    /*(non-Javadoc) @see java.lang.Object#hashCode() */
+    @Override
+    public int hashCode() {
+        return hcode + field.hashCode();
+    }
 }

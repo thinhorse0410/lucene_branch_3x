@@ -5,9 +5,9 @@
  * The ASF licenses this file to You under the Apache License, Version 2.0
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,7 +20,7 @@ package org.apache.lucene.index;
 import java.io.IOException;
 
 /** Base class for enumerating all but deleted docs.
- * 
+ *
  * <p>NOTE: this class is meant only to be used internally
  * by Lucene; it's only public so it can be shared across
  * packages.  This means the API is freely subject to
@@ -28,64 +28,64 @@ import java.io.IOException;
  * Lucene release.  Use directly at your own risk! */
 public abstract class AbstractAllTermDocs implements TermDocs {
 
-  protected int maxDoc;
-  protected int doc = -1;
+    protected int maxDoc;
+    protected int doc = -1;
 
-  protected AbstractAllTermDocs(int maxDoc) {
-    this.maxDoc = maxDoc;
-  }
-
-  public void seek(Term term) throws IOException {
-    if (term==null) {
-      doc = -1;
-    } else {
-      throw new UnsupportedOperationException();
+    protected AbstractAllTermDocs(int maxDoc) {
+        this.maxDoc = maxDoc;
     }
-  }
 
-  public void seek(TermEnum termEnum) throws IOException {
-    throw new UnsupportedOperationException();
-  }
-
-  public int doc() {
-    return doc;
-  }
-
-  public int freq() {
-    return 1;
-  }
-
-  public boolean next() throws IOException {
-    return skipTo(doc+1);
-  }
-
-  public int read(int[] docs, int[] freqs) throws IOException {
-    final int length = docs.length;
-    int i = 0;
-    while (i < length && doc < maxDoc) {
-      if (!isDeleted(doc)) {
-        docs[i] = doc;
-        freqs[i] = 1;
-        ++i;
-      }
-      doc++;
+    public void seek(Term term) throws IOException {
+        if (term == null) {
+            doc = -1;
+        } else {
+            throw new UnsupportedOperationException();
+        }
     }
-    return i;
-  }
 
-  public boolean skipTo(int target) throws IOException {
-    doc = target;
-    while (doc < maxDoc) {
-      if (!isDeleted(doc)) {
-        return true;
-      }
-      doc++;
+    public void seek(TermEnum termEnum) throws IOException {
+        throw new UnsupportedOperationException();
     }
-    return false;
-  }
 
-  public void close() throws IOException {
-  }
+    public int doc() {
+        return doc;
+    }
 
-  public abstract boolean isDeleted(int doc);
+    public int freq() {
+        return 1;
+    }
+
+    public boolean next() throws IOException {
+        return skipTo(doc + 1);
+    }
+
+    public int read(int[] docs, int[] freqs) throws IOException {
+        final int length = docs.length;
+        int i = 0;
+        while (i < length && doc < maxDoc) {
+            if (!isDeleted(doc)) {
+                docs[i] = doc;
+                freqs[i] = 1;
+                ++i;
+            }
+            doc++;
+        }
+        return i;
+    }
+
+    public boolean skipTo(int target) throws IOException {
+        doc = target;
+        while (doc < maxDoc) {
+            if (!isDeleted(doc)) {
+                return true;
+            }
+            doc++;
+        }
+        return false;
+    }
+
+    public void close() throws IOException {
+    }
+
+    public abstract boolean isDeleted(int doc);
 }

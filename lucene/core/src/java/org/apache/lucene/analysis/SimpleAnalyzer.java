@@ -7,9 +7,9 @@ package org.apache.lucene.analysis;
  * The ASF licenses this file to You under the Apache License, Version 2.0
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,12 +17,12 @@ package org.apache.lucene.analysis;
  * limitations under the License.
  */
 
-import java.io.Reader;
-
 import org.apache.lucene.util.Version;
 
-/** An {@link Analyzer} that filters {@link LetterTokenizer} 
- *  with {@link LowerCaseFilter} 
+import java.io.Reader;
+
+/** An {@link Analyzer} that filters {@link LetterTokenizer}
+ *  with {@link LowerCaseFilter}
  * <p>
  * <a name="version">You must specify the required {@link Version} compatibility
  * when creating {@link CharTokenizer}:
@@ -35,26 +35,28 @@ import org.apache.lucene.util.Version;
  **/
 public final class SimpleAnalyzer extends ReusableAnalyzerBase {
 
-  private final Version matchVersion;
-  
-  /**
-   * Creates a new {@link SimpleAnalyzer}
-   * @param matchVersion Lucene version to match See {@link <a href="#version">above</a>}
-   */
-  public SimpleAnalyzer(Version matchVersion) {
-    this.matchVersion = matchVersion;
-  }
-  
-  /**
-   * Creates a new {@link SimpleAnalyzer}
-   * @deprecated use {@link #SimpleAnalyzer(Version)} instead 
-   */
-  @Deprecated  public SimpleAnalyzer() {
-    this(Version.LUCENE_30);
-  }
-  @Override
-  protected TokenStreamComponents createComponents(final String fieldName,
-      final Reader reader) {
-    return new TokenStreamComponents(new LowerCaseTokenizer(matchVersion, reader));
-  }
+    private final Version matchVersion;
+
+    /**
+     * Creates a new {@link SimpleAnalyzer}
+     * @param matchVersion Lucene version to match See {@link <a href="#version">above</a>}
+     */
+    public SimpleAnalyzer(Version matchVersion) {
+        this.matchVersion = matchVersion;
+    }
+
+    /**
+     * Creates a new {@link SimpleAnalyzer}
+     * @deprecated use {@link #SimpleAnalyzer(Version)} instead
+     */
+    @Deprecated
+    public SimpleAnalyzer() {
+        this(Version.LUCENE_30);
+    }
+
+    @Override
+    protected TokenStreamComponents createComponents(final String fieldName,
+                                                     final Reader reader) {
+        return new TokenStreamComponents(new LowerCaseTokenizer(matchVersion, reader));
+    }
 }

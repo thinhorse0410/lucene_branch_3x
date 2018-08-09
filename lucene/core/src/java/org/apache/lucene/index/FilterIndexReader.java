@@ -7,9 +7,9 @@ package org.apache.lucene.index;
  * The ASF licenses this file to You under the Apache License, Version 2.0
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -40,294 +40,340 @@ import java.util.Map;
  */
 public class FilterIndexReader extends IndexReader {
 
-  /** Base class for filtering {@link TermDocs} implementations. */
-  public static class FilterTermDocs implements TermDocs {
-    protected TermDocs in;
+    /** Base class for filtering {@link TermDocs} implementations. */
+    public static class FilterTermDocs implements TermDocs {
+        protected TermDocs in;
 
-    public FilterTermDocs(TermDocs in) { this.in = in; }
+        public FilterTermDocs(TermDocs in) {
+            this.in = in;
+        }
 
-    public void seek(Term term) throws IOException { in.seek(term); }
-    public void seek(TermEnum termEnum) throws IOException { in.seek(termEnum); }
-    public int doc() { return in.doc(); }
-    public int freq() { return in.freq(); }
-    public boolean next() throws IOException { return in.next(); }
-    public int read(int[] docs, int[] freqs) throws IOException {
-      return in.read(docs, freqs);
+        public void seek(Term term) throws IOException {
+            in.seek(term);
+        }
+
+        public void seek(TermEnum termEnum) throws IOException {
+            in.seek(termEnum);
+        }
+
+        public int doc() {
+            return in.doc();
+        }
+
+        public int freq() {
+            return in.freq();
+        }
+
+        public boolean next() throws IOException {
+            return in.next();
+        }
+
+        public int read(int[] docs, int[] freqs) throws IOException {
+            return in.read(docs, freqs);
+        }
+
+        public boolean skipTo(int i) throws IOException {
+            return in.skipTo(i);
+        }
+
+        public void close() throws IOException {
+            in.close();
+        }
     }
-    public boolean skipTo(int i) throws IOException { return in.skipTo(i); }
-    public void close() throws IOException { in.close(); }
-  }
 
-  /** Base class for filtering {@link TermPositions} implementations. */
-  public static class FilterTermPositions
-          extends FilterTermDocs implements TermPositions {
+    /** Base class for filtering {@link TermPositions} implementations. */
+    public static class FilterTermPositions
+            extends FilterTermDocs implements TermPositions {
 
-    public FilterTermPositions(TermPositions in) { super(in); }
+        public FilterTermPositions(TermPositions in) {
+            super(in);
+        }
 
-    public int nextPosition() throws IOException {
-      return ((TermPositions) this.in).nextPosition();
+        public int nextPosition() throws IOException {
+            return ((TermPositions) this.in).nextPosition();
+        }
+
+        public int getPayloadLength() {
+            return ((TermPositions) this.in).getPayloadLength();
+        }
+
+        public byte[] getPayload(byte[] data, int offset) throws IOException {
+            return ((TermPositions) this.in).getPayload(data, offset);
+        }
+
+
+        // TODO: Remove warning after API has been finalized
+        public boolean isPayloadAvailable() {
+            return ((TermPositions) this.in).isPayloadAvailable();
+        }
     }
-    
-    public int getPayloadLength() {
-      return ((TermPositions) this.in).getPayloadLength();
+
+    /** Base class for filtering {@link TermEnum} implementations. */
+    public static class FilterTermEnum extends TermEnum {
+        protected TermEnum in;
+
+        public FilterTermEnum(TermEnum in) {
+            this.in = in;
+        }
+
+        @Override
+        public boolean next() throws IOException {
+            return in.next();
+        }
+
+        @Override
+        public Term term() {
+            return in.term();
+        }
+
+        @Override
+        public int docFreq() {
+            return in.docFreq();
+        }
+
+        @Override
+        public void close() throws IOException {
+            in.close();
+        }
     }
 
-    public byte[] getPayload(byte[] data, int offset) throws IOException {
-      return ((TermPositions) this.in).getPayload(data, offset);
+    protected IndexReader in;
+
+    /**
+     * <p>Construct a FilterIndexReader based on the specified base reader.
+     * Directory locking for delete, undeleteAll, and setNorm operations is
+     * left to the base reader.</p>
+     * <p>Note that base reader is closed if this FilterIndexReader is closed.</p>
+     * @param in specified base reader.
+     */
+    public FilterIndexReader(IndexReader in) {
+        super();
+        this.in = in;
     }
-
-
-    // TODO: Remove warning after API has been finalized
-    public boolean isPayloadAvailable() {
-      return ((TermPositions)this.in).isPayloadAvailable();
-    }
-  }
-
-  /** Base class for filtering {@link TermEnum} implementations. */
-  public static class FilterTermEnum extends TermEnum {
-    protected TermEnum in;
-
-    public FilterTermEnum(TermEnum in) { this.in = in; }
 
     @Override
-    public boolean next() throws IOException { return in.next(); }
+    public Directory directory() {
+        ensureOpen();
+        return in.directory();
+    }
+
     @Override
-    public Term term() { return in.term(); }
+    public IndexCommit getIndexCommit() throws IOException {
+        ensureOpen();
+        return in.getIndexCommit();
+    }
+
     @Override
-    public int docFreq() { return in.docFreq(); }
+    public FieldInfos getFieldInfos() {
+        return in.getFieldInfos();
+    }
+
     @Override
-    public void close() throws IOException { in.close(); }
-  }
+    public int getTermInfosIndexDivisor() {
+        ensureOpen();
+        return in.getTermInfosIndexDivisor();
+    }
 
-  protected IndexReader in;
+    @Override
+    public TermFreqVector[] getTermFreqVectors(int docNumber)
+            throws IOException {
+        ensureOpen();
+        return in.getTermFreqVectors(docNumber);
+    }
 
-  /**
-   * <p>Construct a FilterIndexReader based on the specified base reader.
-   * Directory locking for delete, undeleteAll, and setNorm operations is
-   * left to the base reader.</p>
-   * <p>Note that base reader is closed if this FilterIndexReader is closed.</p>
-   * @param in specified base reader.
-   */
-  public FilterIndexReader(IndexReader in) {
-    super();
-    this.in = in;
-  }
+    @Override
+    public TermFreqVector getTermFreqVector(int docNumber, String field)
+            throws IOException {
+        ensureOpen();
+        return in.getTermFreqVector(docNumber, field);
+    }
 
-  @Override
-  public Directory directory() {
-    ensureOpen();
-    return in.directory();
-  }
-  
-  @Override
-  public IndexCommit getIndexCommit() throws IOException {
-    ensureOpen();
-    return in.getIndexCommit();
-  }
-  
-  @Override
-  public FieldInfos getFieldInfos() {
-    return in.getFieldInfos();
-  }
+    @Override
+    public void getTermFreqVector(int docNumber, String field, TermVectorMapper mapper) throws IOException {
+        ensureOpen();
+        in.getTermFreqVector(docNumber, field, mapper);
+    }
 
-  @Override
-  public int getTermInfosIndexDivisor() {
-    ensureOpen();
-    return in.getTermInfosIndexDivisor();
-  }
-  
-  @Override
-  public TermFreqVector[] getTermFreqVectors(int docNumber)
-          throws IOException {
-    ensureOpen();
-    return in.getTermFreqVectors(docNumber);
-  }
+    @Override
+    public void getTermFreqVector(int docNumber, TermVectorMapper mapper) throws IOException {
+        ensureOpen();
+        in.getTermFreqVector(docNumber, mapper);
+    }
 
-  @Override
-  public TermFreqVector getTermFreqVector(int docNumber, String field)
-          throws IOException {
-    ensureOpen();
-    return in.getTermFreqVector(docNumber, field);
-  }
+    @Override
+    public long getUniqueTermCount() throws IOException {
+        ensureOpen();
+        return in.getUniqueTermCount();
+    }
 
-  @Override
-  public void getTermFreqVector(int docNumber, String field, TermVectorMapper mapper) throws IOException {
-    ensureOpen();
-    in.getTermFreqVector(docNumber, field, mapper);
-  }
+    @Override
+    public int numDocs() {
+        // Don't call ensureOpen() here (it could affect performance)
+        return in.numDocs();
+    }
 
-  @Override
-  public void getTermFreqVector(int docNumber, TermVectorMapper mapper) throws IOException {
-    ensureOpen();
-    in.getTermFreqVector(docNumber, mapper);
-  }
+    @Override
+    public int maxDoc() {
+        // Don't call ensureOpen() here (it could affect performance)
+        return in.maxDoc();
+    }
 
-  @Override
-  public long getUniqueTermCount() throws IOException {
-    ensureOpen();
-    return in.getUniqueTermCount();
-  }
-  
-  @Override
-  public int numDocs() {
-    // Don't call ensureOpen() here (it could affect performance)
-    return in.numDocs();
-  }
+    @Override
+    public Document document(int n, FieldSelector fieldSelector) throws CorruptIndexException, IOException {
+        ensureOpen();
+        return in.document(n, fieldSelector);
+    }
 
-  @Override
-  public int maxDoc() {
-    // Don't call ensureOpen() here (it could affect performance)
-    return in.maxDoc();
-  }
+    @Override
+    public boolean isDeleted(int n) {
+        // Don't call ensureOpen() here (it could affect performance)
+        return in.isDeleted(n);
+    }
 
-  @Override
-  public Document document(int n, FieldSelector fieldSelector) throws CorruptIndexException, IOException {
-    ensureOpen();
-    return in.document(n, fieldSelector);
-  }
+    @Override
+    public boolean hasDeletions() {
+        ensureOpen();
+        return in.hasDeletions();
+    }
 
-  @Override
-  public boolean isDeleted(int n) {
-    // Don't call ensureOpen() here (it could affect performance)
-    return in.isDeleted(n);
-  }
+    /** {@inheritDoc} */
+    @Override
+    @Deprecated
+    protected void doUndeleteAll() throws CorruptIndexException, IOException {
+        in.undeleteAll();
+    }
 
-  @Override
-  public boolean hasDeletions() {
-    ensureOpen();
-    return in.hasDeletions();
-  }
+    @Override
+    public boolean hasNorms(String field) throws IOException {
+        ensureOpen();
+        return in.hasNorms(field);
+    }
 
-  /** {@inheritDoc} */
-  @Override @Deprecated
-  protected void doUndeleteAll() throws CorruptIndexException, IOException {in.undeleteAll();}
+    @Override
+    public byte[] norms(String f) throws IOException {
+        ensureOpen();
+        return in.norms(f);
+    }
 
-  @Override
-  public boolean hasNorms(String field) throws IOException {
-    ensureOpen();
-    return in.hasNorms(field);
-  }
+    @Override
+    public void norms(String f, byte[] bytes, int offset) throws IOException {
+        ensureOpen();
+        in.norms(f, bytes, offset);
+    }
 
-  @Override
-  public byte[] norms(String f) throws IOException {
-    ensureOpen();
-    return in.norms(f);
-  }
+    /** {@inheritDoc} */
+    @Override
+    @Deprecated
+    protected void doSetNorm(int d, String f, byte b) throws CorruptIndexException, IOException {
+        in.setNorm(d, f, b);
+    }
 
-  @Override
-  public void norms(String f, byte[] bytes, int offset) throws IOException {
-    ensureOpen();
-    in.norms(f, bytes, offset);
-  }
+    @Override
+    public TermEnum terms() throws IOException {
+        ensureOpen();
+        return in.terms();
+    }
 
-  /** {@inheritDoc} */
-  @Override @Deprecated
-  protected void doSetNorm(int d, String f, byte b) throws CorruptIndexException, IOException {
-    in.setNorm(d, f, b);
-  }
+    @Override
+    public TermEnum terms(Term t) throws IOException {
+        ensureOpen();
+        return in.terms(t);
+    }
 
-  @Override
-  public TermEnum terms() throws IOException {
-    ensureOpen();
-    return in.terms();
-  }
+    @Override
+    public int docFreq(Term t) throws IOException {
+        ensureOpen();
+        return in.docFreq(t);
+    }
 
-  @Override
-  public TermEnum terms(Term t) throws IOException {
-    ensureOpen();
-    return in.terms(t);
-  }
+    @Override
+    public TermDocs termDocs() throws IOException {
+        ensureOpen();
+        return in.termDocs();
+    }
 
-  @Override
-  public int docFreq(Term t) throws IOException {
-    ensureOpen();
-    return in.docFreq(t);
-  }
+    @Override
+    public TermDocs termDocs(Term term) throws IOException {
+        ensureOpen();
+        return in.termDocs(term);
+    }
 
-  @Override
-  public TermDocs termDocs() throws IOException {
-    ensureOpen();
-    return in.termDocs();
-  }
+    @Override
+    public TermPositions termPositions() throws IOException {
+        ensureOpen();
+        return in.termPositions();
+    }
 
-  @Override
-  public TermDocs termDocs(Term term) throws IOException {
-    ensureOpen();
-    return in.termDocs(term);
-  }
+    /** {@inheritDoc} */
+    @Override
+    @Deprecated
+    protected void doDelete(int n) throws CorruptIndexException, IOException {
+        in.deleteDocument(n);
+    }
 
-  @Override
-  public TermPositions termPositions() throws IOException {
-    ensureOpen();
-    return in.termPositions();
-  }
+    /** {@inheritDoc} */
+    @Override
+    @Deprecated
+    protected void doCommit(Map<String, String> commitUserData) throws IOException {
+        in.commit(commitUserData);
+    }
 
-  /** {@inheritDoc} */
-  @Override @Deprecated
-  protected void doDelete(int n) throws  CorruptIndexException, IOException { in.deleteDocument(n); }
-  
-  /** {@inheritDoc} */
-  @Override @Deprecated
-  protected void doCommit(Map<String,String> commitUserData) throws IOException {
-    in.commit(commitUserData);
-  }
-  
-  @Override
-  protected void doClose() throws IOException {
-    in.close();
-  }
+    @Override
+    protected void doClose() throws IOException {
+        in.close();
+    }
 
-  @Override
-  public long getVersion() {
-    ensureOpen();
-    return in.getVersion();
-  }
+    @Override
+    public long getVersion() {
+        ensureOpen();
+        return in.getVersion();
+    }
 
-  @Override
-  public boolean isCurrent() throws CorruptIndexException, IOException {
-    ensureOpen();
-    return in.isCurrent();
-  }
+    @Override
+    public boolean isCurrent() throws CorruptIndexException, IOException {
+        ensureOpen();
+        return in.isCurrent();
+    }
 
-  @Deprecated
-  @Override
-  public boolean isOptimized() {
-    ensureOpen();
-    return in.isOptimized();
-  }
+    @Deprecated
+    @Override
+    public boolean isOptimized() {
+        ensureOpen();
+        return in.isOptimized();
+    }
 
-  @Override
-  public IndexReader[] getSequentialSubReaders() {
-    return in.getSequentialSubReaders();
-  }
+    @Override
+    public IndexReader[] getSequentialSubReaders() {
+        return in.getSequentialSubReaders();
+    }
 
-  @Override
-  public Map<String, String> getCommitUserData() { 
-    return in.getCommitUserData();
-  }
-  
-  /** If the subclass of FilteredIndexReader modifies the
-   *  contents of the FieldCache, you must override this
-   *  method to provide a different key */
-  @Override
-  public Object getCoreCacheKey() {
-    return in.getCoreCacheKey();
-  }
+    @Override
+    public Map<String, String> getCommitUserData() {
+        return in.getCommitUserData();
+    }
 
-  /** If the subclass of FilteredIndexReader modifies the
-   *  deleted docs, you must override this method to provide
-   *  a different key */
-  @Override
-  public Object getDeletesCacheKey() {
-    return in.getDeletesCacheKey();
-  }
+    /** If the subclass of FilteredIndexReader modifies the
+     *  contents of the FieldCache, you must override this
+     *  method to provide a different key */
+    @Override
+    public Object getCoreCacheKey() {
+        return in.getCoreCacheKey();
+    }
 
-  /** {@inheritDoc} */
-  @Override
-  public String toString() {
-    final StringBuilder buffer = new StringBuilder("FilterReader(");
-    buffer.append(in);
-    buffer.append(')');
-    return buffer.toString();
-  }
+    /** If the subclass of FilteredIndexReader modifies the
+     *  deleted docs, you must override this method to provide
+     *  a different key */
+    @Override
+    public Object getDeletesCacheKey() {
+        return in.getDeletesCacheKey();
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public String toString() {
+        final StringBuilder buffer = new StringBuilder("FilterReader(");
+        buffer.append(in);
+        buffer.append(')');
+        return buffer.toString();
+    }
 }

@@ -27,26 +27,26 @@ import java.util.Set;
  */
 public final class TypeTokenFilter extends FilteringTokenFilter {
 
-  private final Set<String> stopTypes;
-  private final TypeAttribute typeAttribute = addAttribute(TypeAttribute.class);
-  private final boolean useWhiteList;
+    private final Set<String> stopTypes;
+    private final TypeAttribute typeAttribute = addAttribute(TypeAttribute.class);
+    private final boolean useWhiteList;
 
-  public TypeTokenFilter(boolean enablePositionIncrements, TokenStream input, Set<String> stopTypes, boolean useWhiteList) {
-    super(enablePositionIncrements, input);
-    this.stopTypes = stopTypes;
-    this.useWhiteList = useWhiteList;
-  }
+    public TypeTokenFilter(boolean enablePositionIncrements, TokenStream input, Set<String> stopTypes, boolean useWhiteList) {
+        super(enablePositionIncrements, input);
+        this.stopTypes = stopTypes;
+        this.useWhiteList = useWhiteList;
+    }
 
-  public TypeTokenFilter(boolean enablePositionIncrements, TokenStream input, Set<String> stopTypes) {
-    this(enablePositionIncrements, input, stopTypes, false);
-  }
+    public TypeTokenFilter(boolean enablePositionIncrements, TokenStream input, Set<String> stopTypes) {
+        this(enablePositionIncrements, input, stopTypes, false);
+    }
 
-  /**
-   * By default accept the token if its type is not a stop type.
-   * When the useWhiteList parameter is set to true then accept the token if its type is contained in the stopTypes
-   */
-  @Override
-  protected boolean accept() throws IOException {
-    return useWhiteList == stopTypes.contains(typeAttribute.type());
-  }
+    /**
+     * By default accept the token if its type is not a stop type.
+     * When the useWhiteList parameter is set to true then accept the token if its type is contained in the stopTypes
+     */
+    @Override
+    protected boolean accept() throws IOException {
+        return useWhiteList == stopTypes.contains(typeAttribute.type());
+    }
 }

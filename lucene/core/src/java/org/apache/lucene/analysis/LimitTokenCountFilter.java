@@ -7,9 +7,9 @@ package org.apache.lucene.analysis;
  * The ASF licenses this file to You under the Apache License, Version 2.0
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -25,29 +25,29 @@ import java.io.IOException;
  */
 public final class LimitTokenCountFilter extends TokenFilter {
 
-  private final int maxTokenCount;
-  private int tokenCount = 0;
+    private final int maxTokenCount;
+    private int tokenCount = 0;
 
-  /**
-   * Build a filter that only accepts tokens up to a maximum number.
-   */
-  public LimitTokenCountFilter(TokenStream in, int maxTokenCount) {
-    super(in);
-    this.maxTokenCount = maxTokenCount;
-  }
-  
-  @Override
-  public boolean incrementToken() throws IOException {
-    if (tokenCount < maxTokenCount && input.incrementToken()) {
-      tokenCount++;
-      return true;
+    /**
+     * Build a filter that only accepts tokens up to a maximum number.
+     */
+    public LimitTokenCountFilter(TokenStream in, int maxTokenCount) {
+        super(in);
+        this.maxTokenCount = maxTokenCount;
     }
-    return false;
-  }
 
-  @Override
-  public void reset() throws IOException {
-    super.reset();
-    tokenCount = 0;
-  }
+    @Override
+    public boolean incrementToken() throws IOException {
+        if (tokenCount < maxTokenCount && input.incrementToken()) {
+            tokenCount++;
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public void reset() throws IOException {
+        super.reset();
+        tokenCount = 0;
+    }
 }

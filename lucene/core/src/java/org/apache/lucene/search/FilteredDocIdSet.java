@@ -7,9 +7,9 @@ package org.apache.lucene.search;
  * The ASF licenses this file to You under the Apache License, Version 2.0
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -39,45 +39,45 @@ import java.io.IOException;
  */
 
 public abstract class FilteredDocIdSet extends DocIdSet {
-  private final DocIdSet _innerSet;
-  
-  /**
-   * Constructor.
-   * @param innerSet Underlying DocIdSet
-   */
-  public FilteredDocIdSet(DocIdSet innerSet) {
-    _innerSet = innerSet;
-  }
-  
-  /** This DocIdSet implementation is cacheable if the inner set is cacheable. */
-  @Override
-  public boolean isCacheable() {
-    return _innerSet.isCacheable();
-  }
+    private final DocIdSet _innerSet;
 
-  /**
-   * Validation method to determine whether a docid should be in the result set.
-   * @param docid docid to be tested
-   * @return true if input docid should be in the result set, false otherwise.
-   */
-  protected abstract boolean match(int docid) throws IOException;
-	
-  /**
-   * Implementation of the contract to build a DocIdSetIterator.
-   * @see DocIdSetIterator
-   * @see FilteredDocIdSetIterator
-   */
-  @Override
-  public DocIdSetIterator iterator() throws IOException {
-    final DocIdSetIterator iterator = _innerSet.iterator();
-    if (iterator == null) {
-      return null;
+    /**
+     * Constructor.
+     * @param innerSet Underlying DocIdSet
+     */
+    public FilteredDocIdSet(DocIdSet innerSet) {
+        _innerSet = innerSet;
     }
-    return new FilteredDocIdSetIterator(iterator) {
-      @Override
-      protected boolean match(int docid) throws IOException {
-        return FilteredDocIdSet.this.match(docid);
-      }
-    };
-  }
+
+    /** This DocIdSet implementation is cacheable if the inner set is cacheable. */
+    @Override
+    public boolean isCacheable() {
+        return _innerSet.isCacheable();
+    }
+
+    /**
+     * Validation method to determine whether a docid should be in the result set.
+     * @param docid docid to be tested
+     * @return true if input docid should be in the result set, false otherwise.
+     */
+    protected abstract boolean match(int docid) throws IOException;
+
+    /**
+     * Implementation of the contract to build a DocIdSetIterator.
+     * @see DocIdSetIterator
+     * @see FilteredDocIdSetIterator
+     */
+    @Override
+    public DocIdSetIterator iterator() throws IOException {
+        final DocIdSetIterator iterator = _innerSet.iterator();
+        if (iterator == null) {
+            return null;
+        }
+        return new FilteredDocIdSetIterator(iterator) {
+            @Override
+            protected boolean match(int docid) throws IOException {
+                return FilteredDocIdSet.this.match(docid);
+            }
+        };
+    }
 }

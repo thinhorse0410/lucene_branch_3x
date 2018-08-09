@@ -7,9 +7,9 @@ package org.apache.lucene.search;
  * The ASF licenses this file to You under the Apache License, Version 2.0
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,10 +17,10 @@ package org.apache.lucene.search;
  * limitations under the License.
  */
 
-import java.io.IOException;
-
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.Term;
+
+import java.io.IOException;
 
 /**
  * Subclass of FilteredTermEnum for enumerating all terms that match the
@@ -32,35 +32,35 @@ import org.apache.lucene.index.Term;
  */
 public class PrefixTermEnum extends FilteredTermEnum {
 
-  private final Term prefix;
-  private boolean endEnum = false;
+    private final Term prefix;
+    private boolean endEnum = false;
 
-  public PrefixTermEnum(IndexReader reader, Term prefix) throws IOException {
-    this.prefix = prefix;
+    public PrefixTermEnum(IndexReader reader, Term prefix) throws IOException {
+        this.prefix = prefix;
 
-    setEnum(reader.terms(new Term(prefix.field(), prefix.text())));
-  }
-
-  @Override
-  public float difference() {
-    return 1.0f;
-  }
-
-  @Override
-  protected boolean endEnum() {
-    return endEnum;
-  }
-  
-  protected Term getPrefixTerm() {
-      return prefix;
-  }
-
-  @Override
-  protected boolean termCompare(Term term) {
-    if (term.field() == prefix.field() && term.text().startsWith(prefix.text())) {                                                                              
-      return true;
+        setEnum(reader.terms(new Term(prefix.field(), prefix.text())));
     }
-    endEnum = true;
-    return false;
-  }
+
+    @Override
+    public float difference() {
+        return 1.0f;
+    }
+
+    @Override
+    protected boolean endEnum() {
+        return endEnum;
+    }
+
+    protected Term getPrefixTerm() {
+        return prefix;
+    }
+
+    @Override
+    protected boolean termCompare(Term term) {
+        if (term.field() == prefix.field() && term.text().startsWith(prefix.text())) {
+            return true;
+        }
+        endEnum = true;
+        return false;
+    }
 }

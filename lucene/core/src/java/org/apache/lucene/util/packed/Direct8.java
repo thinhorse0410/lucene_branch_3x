@@ -7,9 +7,9 @@ package org.apache.lucene.util.packed;
  * The ASF licenses this file to You under the Apache License, Version 2.0
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -30,69 +30,69 @@ import java.util.Arrays;
 
 class Direct8 extends PackedInts.ReaderImpl
         implements PackedInts.Mutable {
-  private byte[] values;
-  private static final int BITS_PER_VALUE = 8;
+    private byte[] values;
+    private static final int BITS_PER_VALUE = 8;
 
-  public Direct8(int valueCount) {
-    super(valueCount, BITS_PER_VALUE);
-    values = new byte[valueCount];
-  }
-
-  public Direct8(DataInput in, int valueCount)
-          throws IOException {
-    super(valueCount, BITS_PER_VALUE);
-    byte[] values = new byte[valueCount];
-    for(int i=0;i<valueCount;i++) {
-      values[i] = in.readByte();
-    }
-    final int mod = valueCount % 8;
-    if (mod != 0) {
-      final int pad = 8-mod;
-      // round out long
-      for(int i=0;i<pad;i++) {
-        in.readByte();
-      }
+    public Direct8(int valueCount) {
+        super(valueCount, BITS_PER_VALUE);
+        values = new byte[valueCount];
     }
 
-    this.values = values;
-  }
+    public Direct8(DataInput in, int valueCount)
+            throws IOException {
+        super(valueCount, BITS_PER_VALUE);
+        byte[] values = new byte[valueCount];
+        for (int i = 0; i < valueCount; i++) {
+            values[i] = in.readByte();
+        }
+        final int mod = valueCount % 8;
+        if (mod != 0) {
+            final int pad = 8 - mod;
+            // round out long
+            for (int i = 0; i < pad; i++) {
+                in.readByte();
+            }
+        }
 
-  /**
-   * Creates an array backed by the given values.
-   * </p><p>
-   * Note: The values are used directly, so changes to the given values will
-   * affect the structure.
-   * @param values used as the internal backing array.
-   */
-  public Direct8(byte[] values) {
-    super(values.length, BITS_PER_VALUE);
-    this.values = values;
-  }
+        this.values = values;
+    }
 
-  public long get(final int index) {
-    assert index >= 0 && index < size();
-    return 0xFFL & values[index];
-  }
+    /**
+     * Creates an array backed by the given values.
+     * </p><p>
+     * Note: The values are used directly, so changes to the given values will
+     * affect the structure.
+     * @param values used as the internal backing array.
+     */
+    public Direct8(byte[] values) {
+        super(values.length, BITS_PER_VALUE);
+        this.values = values;
+    }
 
-  public void set(final int index, final long value) {
-    values[index] = (byte)(value & 0xFF);
-  }
+    public long get(final int index) {
+        assert index >= 0 && index < size();
+        return 0xFFL & values[index];
+    }
 
-  public long ramBytesUsed() {
-    return RamUsageEstimator.sizeOf(values);
-  }
+    public void set(final int index, final long value) {
+        values[index] = (byte) (value & 0xFF);
+    }
 
-  public void clear() {
-    Arrays.fill(values, (byte)0);
-  }
+    public long ramBytesUsed() {
+        return RamUsageEstimator.sizeOf(values);
+    }
 
-  @Override
-  public Object getArray() {
-    return values;
-  }
+    public void clear() {
+        Arrays.fill(values, (byte) 0);
+    }
 
-  @Override
-  public boolean hasArray() {
-    return true;
-  }
+    @Override
+    public Object getArray() {
+        return values;
+    }
+
+    @Override
+    public boolean hasArray() {
+        return true;
+    }
 }

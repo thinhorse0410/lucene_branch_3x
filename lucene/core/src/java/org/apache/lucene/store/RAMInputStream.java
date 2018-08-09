@@ -7,9 +7,9 @@ package org.apache.lucene.store;
  * The ASF licenses this file to You under the Apache License, Version 2.0
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,132 +17,132 @@ package org.apache.lucene.store;
  * limitations under the License.
  */
 
-import java.io.IOException;
 import java.io.EOFException;
+import java.io.IOException;
 
 /** A memory-resident {@link IndexInput} implementation. 
- *  
+ *
  *  @lucene.internal */
 public class RAMInputStream extends IndexInput implements Cloneable {
-  static final int BUFFER_SIZE = RAMOutputStream.BUFFER_SIZE;
+    static final int BUFFER_SIZE = RAMOutputStream.BUFFER_SIZE;
 
-  private RAMFile file;
-  private long length;
+    private RAMFile file;
+    private long length;
 
-  private byte[] currentBuffer;
-  private int currentBufferIndex;
-  
-  private int bufferPosition;
-  private long bufferStart;
-  private int bufferLength;
+    private byte[] currentBuffer;
+    private int currentBufferIndex;
 
-  /** Please pass String name */
-  @Deprecated
-  public RAMInputStream(RAMFile f) throws IOException {
-    this("anonymous", f);
-  }
+    private int bufferPosition;
+    private long bufferStart;
+    private int bufferLength;
 
-  public RAMInputStream(String name, RAMFile f) throws IOException {
-    super("RAMInputStream(name=" + name + ")");
-    file = f;
-    length = file.length;
-    if (length/BUFFER_SIZE >= Integer.MAX_VALUE) {
-      throw new IOException("RAMInputStream too large length=" + length + ": " + name); 
+    /** Please pass String name */
+    @Deprecated
+    public RAMInputStream(RAMFile f) throws IOException {
+        this("anonymous", f);
     }
 
-    // make sure that we switch to the
-    // first needed buffer lazily
-    currentBufferIndex = -1;
-    currentBuffer = null;
-  }
+    public RAMInputStream(String name, RAMFile f) throws IOException {
+        super("RAMInputStream(name=" + name + ")");
+        file = f;
+        length = file.length;
+        if (length / BUFFER_SIZE >= Integer.MAX_VALUE) {
+            throw new IOException("RAMInputStream too large length=" + length + ": " + name);
+        }
 
-  @Override
-  public void close() {
-    // nothing to do here
-  }
-
-  @Override
-  public long length() {
-    return length;
-  }
-
-  @Override
-  public byte readByte() throws IOException {
-    if (bufferPosition >= bufferLength) {
-      currentBufferIndex++;
-      switchCurrentBuffer(true);
+        // make sure that we switch to the
+        // first needed buffer lazily
+        currentBufferIndex = -1;
+        currentBuffer = null;
     }
-    return currentBuffer[bufferPosition++];
-  }
 
-  @Override
-  public void readBytes(byte[] b, int offset, int len) throws IOException {
-    while (len > 0) {
-      if (bufferPosition >= bufferLength) {
-        currentBufferIndex++;
-        switchCurrentBuffer(true);
-      }
-
-      int remainInBuffer = bufferLength - bufferPosition;
-      int bytesToCopy = len < remainInBuffer ? len : remainInBuffer;
-      System.arraycopy(currentBuffer, bufferPosition, b, offset, bytesToCopy);
-      offset += bytesToCopy;
-      len -= bytesToCopy;
-      bufferPosition += bytesToCopy;
+    @Override
+    public void close() {
+        // nothing to do here
     }
-  }
 
-  private final void switchCurrentBuffer(boolean enforceEOF) throws IOException {
-    bufferStart = (long) BUFFER_SIZE * (long) currentBufferIndex;
-    if (currentBufferIndex >= file.numBuffers()) {
-      // end of file reached, no more buffers left
-      if (enforceEOF) {
-        throw new EOFException("read past EOF: " + this);
-      } else {
-        // Force EOF if a read takes place at this position
-        currentBufferIndex--;
-        bufferPosition = BUFFER_SIZE;
-      }
-    } else {
-      currentBuffer = file.getBuffer(currentBufferIndex);
-      bufferPosition = 0;
-      long buflen = length - bufferStart;
-      bufferLength = buflen > BUFFER_SIZE ? BUFFER_SIZE : (int) buflen;
+    @Override
+    public long length() {
+        return length;
     }
-  }
 
-  @Override
-  public void copyBytes(IndexOutput out, long numBytes) throws IOException {
-    assert numBytes >= 0: "numBytes=" + numBytes;
-    
-    long left = numBytes;
-    while (left > 0) {
-      if (bufferPosition == bufferLength) {
-        ++currentBufferIndex;
-        switchCurrentBuffer(true);
-      }
-      
-      final int bytesInBuffer = bufferLength - bufferPosition;
-      final int toCopy = (int) (bytesInBuffer < left ? bytesInBuffer : left);
-      out.writeBytes(currentBuffer, bufferPosition, toCopy);
-      bufferPosition += toCopy;
-      left -= toCopy;
+    @Override
+    public byte readByte() throws IOException {
+        if (bufferPosition >= bufferLength) {
+            currentBufferIndex++;
+            switchCurrentBuffer(true);
+        }
+        return currentBuffer[bufferPosition++];
     }
-    
-    assert left == 0: "Insufficient bytes to copy: numBytes=" + numBytes + " copied=" + (numBytes - left);
-  }
-  
-  @Override
-  public long getFilePointer() {
-    return currentBufferIndex < 0 ? 0 : bufferStart + bufferPosition;
-  }
 
-  @Override
-  public void seek(long pos) throws IOException {
-    if (currentBuffer==null || pos < bufferStart || pos >= bufferStart + BUFFER_SIZE) {
-      currentBufferIndex = (int) (pos / BUFFER_SIZE);
-      switchCurrentBuffer(false);
+    @Override
+    public void readBytes(byte[] b, int offset, int len) throws IOException {
+        while (len > 0) {
+            if (bufferPosition >= bufferLength) {
+                currentBufferIndex++;
+                switchCurrentBuffer(true);
+            }
+
+            int remainInBuffer = bufferLength - bufferPosition;
+            int bytesToCopy = len < remainInBuffer ? len : remainInBuffer;
+            System.arraycopy(currentBuffer, bufferPosition, b, offset, bytesToCopy);
+            offset += bytesToCopy;
+            len -= bytesToCopy;
+            bufferPosition += bytesToCopy;
+        }
     }
-    bufferPosition = (int) (pos % BUFFER_SIZE);
-  }
+
+    private final void switchCurrentBuffer(boolean enforceEOF) throws IOException {
+        bufferStart = (long) BUFFER_SIZE * (long) currentBufferIndex;
+        if (currentBufferIndex >= file.numBuffers()) {
+            // end of file reached, no more buffers left
+            if (enforceEOF) {
+                throw new EOFException("read past EOF: " + this);
+            } else {
+                // Force EOF if a read takes place at this position
+                currentBufferIndex--;
+                bufferPosition = BUFFER_SIZE;
+            }
+        } else {
+            currentBuffer = file.getBuffer(currentBufferIndex);
+            bufferPosition = 0;
+            long buflen = length - bufferStart;
+            bufferLength = buflen > BUFFER_SIZE ? BUFFER_SIZE : (int) buflen;
+        }
+    }
+
+    @Override
+    public void copyBytes(IndexOutput out, long numBytes) throws IOException {
+        assert numBytes >= 0 : "numBytes=" + numBytes;
+
+        long left = numBytes;
+        while (left > 0) {
+            if (bufferPosition == bufferLength) {
+                ++currentBufferIndex;
+                switchCurrentBuffer(true);
+            }
+
+            final int bytesInBuffer = bufferLength - bufferPosition;
+            final int toCopy = (int) (bytesInBuffer < left ? bytesInBuffer : left);
+            out.writeBytes(currentBuffer, bufferPosition, toCopy);
+            bufferPosition += toCopy;
+            left -= toCopy;
+        }
+
+        assert left == 0 : "Insufficient bytes to copy: numBytes=" + numBytes + " copied=" + (numBytes - left);
+    }
+
+    @Override
+    public long getFilePointer() {
+        return currentBufferIndex < 0 ? 0 : bufferStart + bufferPosition;
+    }
+
+    @Override
+    public void seek(long pos) throws IOException {
+        if (currentBuffer == null || pos < bufferStart || pos >= bufferStart + BUFFER_SIZE) {
+            currentBufferIndex = (int) (pos / BUFFER_SIZE);
+            switchCurrentBuffer(false);
+        }
+        bufferPosition = (int) (pos % BUFFER_SIZE);
+    }
 }

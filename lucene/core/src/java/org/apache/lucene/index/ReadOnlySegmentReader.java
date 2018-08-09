@@ -7,9 +7,9 @@ package org.apache.lucene.index;
  * The ASF licenses this file to You under the Apache License, Version 2.0
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,18 +19,18 @@ package org.apache.lucene.index;
 
 class ReadOnlySegmentReader extends SegmentReader {
 
-  static void noWrite() {
-    throw new UnsupportedOperationException("This IndexReader cannot make any changes to the index (it was opened with readOnly = true)");
-  }
-  
-  @Override
-  protected void acquireWriteLock() {
-    noWrite();
-  }
+    static void noWrite() {
+        throw new UnsupportedOperationException("This IndexReader cannot make any changes to the index (it was opened with readOnly = true)");
+    }
 
-  // Not synchronized
-  @Override
-  public boolean isDeleted(int n) {
-    return deletedDocs != null && deletedDocs.get(n);
-  }
+    @Override
+    protected void acquireWriteLock() {
+        noWrite();
+    }
+
+    // Not synchronized
+    @Override
+    public boolean isDeleted(int n) {
+        return deletedDocs != null && deletedDocs.get(n);
+    }
 }

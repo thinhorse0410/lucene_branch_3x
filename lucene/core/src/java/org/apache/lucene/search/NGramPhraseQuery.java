@@ -7,9 +7,9 @@ package org.apache.lucene.search;
  * The ASF licenses this file to You under the Apache License, Version 2.0
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,10 +17,10 @@ package org.apache.lucene.search;
  * limitations under the License.
  */
 
-import java.io.IOException;
-
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.Term;
+
+import java.io.IOException;
 
 /**
  * This is a {@link PhraseQuery} which is optimized for n-gram phrase query.
@@ -31,68 +31,68 @@ import org.apache.lucene.index.Term;
  *
  */
 public class NGramPhraseQuery extends PhraseQuery {
-  private final int n;
-  
-  /**
-   * Constructor that takes gram size.
-   * @param n
-   */
-  public NGramPhraseQuery(int n){
-    super();
-    this.n = n;
-  }
+    private final int n;
 
-  @Override
-  public Query rewrite(IndexReader reader) throws IOException {
-    if(getSlop() != 0) return super.rewrite(reader);
-    
-    // check whether optimizable or not
-    if(n < 2 || // non-overlap n-gram cannot be optimized
-        getTerms().length < 3)  // too short to optimize
-      return super.rewrite(reader);
-
-    // check all posIncrement is 1
-    // if not, cannot optimize
-    int[] positions = getPositions();
-    Term[] terms = getTerms();
-    int prevPosition = positions[0];
-    for(int i = 1; i < positions.length; i++){
-      int pos = positions[i];
-      if(prevPosition + 1 != pos) return super.rewrite(reader);
-      prevPosition = pos;
+    /**
+     * Constructor that takes gram size.
+     * @param n
+     */
+    public NGramPhraseQuery(int n) {
+        super();
+        this.n = n;
     }
 
-    // now create the new optimized phrase query for n-gram
-    PhraseQuery optimized = new PhraseQuery();
-    int pos = 0;
-    final int lastPos = terms.length - 1;
-    for(int i = 0; i < terms.length; i++){
-      if(pos % n == 0 || pos >= lastPos){
-        optimized.add(terms[i], positions[i]);
-      }
-      pos++;
+    @Override
+    public Query rewrite(IndexReader reader) throws IOException {
+        if (getSlop() != 0) return super.rewrite(reader);
+
+        // check whether optimizable or not
+        if (n < 2 || // non-overlap n-gram cannot be optimized
+                getTerms().length < 3)  // too short to optimize
+            return super.rewrite(reader);
+
+        // check all posIncrement is 1
+        // if not, cannot optimize
+        int[] positions = getPositions();
+        Term[] terms = getTerms();
+        int prevPosition = positions[0];
+        for (int i = 1; i < positions.length; i++) {
+            int pos = positions[i];
+            if (prevPosition + 1 != pos) return super.rewrite(reader);
+            prevPosition = pos;
+        }
+
+        // now create the new optimized phrase query for n-gram
+        PhraseQuery optimized = new PhraseQuery();
+        int pos = 0;
+        final int lastPos = terms.length - 1;
+        for (int i = 0; i < terms.length; i++) {
+            if (pos % n == 0 || pos >= lastPos) {
+                optimized.add(terms[i], positions[i]);
+            }
+            pos++;
+        }
+
+        return optimized;
     }
-    
-    return optimized;
-  }
 
-  /** Returns true iff <code>o</code> is equal to this. */
-  @Override
-  public boolean equals(Object o) {
-    if (!(o instanceof NGramPhraseQuery))
-      return false;
-    NGramPhraseQuery other = (NGramPhraseQuery)o;
-    if(this.n != other.n) return false;
-    return super.equals(other);
-  }
+    /** Returns true iff <code>o</code> is equal to this. */
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof NGramPhraseQuery))
+            return false;
+        NGramPhraseQuery other = (NGramPhraseQuery) o;
+        if (this.n != other.n) return false;
+        return super.equals(other);
+    }
 
-  /** Returns a hash code value for this object.*/
-  @Override
-  public int hashCode() {
-    return Float.floatToIntBits(getBoost())
-      ^ getSlop()
-      ^ getTerms().hashCode()
-      ^ getPositions().hashCode()
-      ^ n;
-  }
+    /** Returns a hash code value for this object.*/
+    @Override
+    public int hashCode() {
+        return Float.floatToIntBits(getBoost())
+                ^ getSlop()
+                ^ getTerms().hashCode()
+                ^ getPositions().hashCode()
+                ^ n;
+    }
 }

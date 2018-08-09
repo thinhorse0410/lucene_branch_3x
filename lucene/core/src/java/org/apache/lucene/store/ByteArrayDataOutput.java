@@ -7,9 +7,9 @@ package org.apache.lucene.store;
  * The ASF licenses this file to You under the Apache License, Version 2.0
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -26,47 +26,47 @@ import org.apache.lucene.util.BytesRef;
  * @lucene.experimental
  */
 public class ByteArrayDataOutput extends DataOutput {
-  private byte[] bytes;
+    private byte[] bytes;
 
-  private int pos;
-  private int limit;
+    private int pos;
+    private int limit;
 
-  public ByteArrayDataOutput(byte[] bytes) {
-    reset(bytes);
-  }
+    public ByteArrayDataOutput(byte[] bytes) {
+        reset(bytes);
+    }
 
-  public ByteArrayDataOutput(byte[] bytes, int offset, int len) {
-    reset(bytes, offset, len);
-  }
+    public ByteArrayDataOutput(byte[] bytes, int offset, int len) {
+        reset(bytes, offset, len);
+    }
 
-  public ByteArrayDataOutput() {
-    reset(BytesRef.EMPTY_BYTES);
-  }
+    public ByteArrayDataOutput() {
+        reset(BytesRef.EMPTY_BYTES);
+    }
 
-  public void reset(byte[] bytes) {
-    reset(bytes, 0, bytes.length);
-  }
-  
-  public void reset(byte[] bytes, int offset, int len) {
-    this.bytes = bytes;
-    pos = offset;
-    limit = offset + len;
-  }
-  
-  public int getPosition() {
-    return pos;
-  }
+    public void reset(byte[] bytes) {
+        reset(bytes, 0, bytes.length);
+    }
 
-  @Override
-  public void writeByte(byte b) {
-    assert pos < limit;
-    bytes[pos++] = b;
-  }
+    public void reset(byte[] bytes, int offset, int len) {
+        this.bytes = bytes;
+        pos = offset;
+        limit = offset + len;
+    }
 
-  @Override
-  public void writeBytes(byte[] b, int offset, int length) {
-    assert pos + length <= limit;
-    System.arraycopy(b, offset, bytes, pos, length);
-    pos += length;
-  }
+    public int getPosition() {
+        return pos;
+    }
+
+    @Override
+    public void writeByte(byte b) {
+        assert pos < limit;
+        bytes[pos++] = b;
+    }
+
+    @Override
+    public void writeBytes(byte[] b, int offset, int length) {
+        assert pos + length <= limit;
+        System.arraycopy(b, offset, bytes, pos, length);
+        pos += length;
+    }
 }

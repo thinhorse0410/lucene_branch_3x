@@ -23,50 +23,49 @@ import java.util.*;
  * <p/>
  * This is not thread-safe.
  */
-public class FieldSortedTermVectorMapper extends TermVectorMapper{
-  private Map<String,SortedSet<TermVectorEntry>> fieldToTerms = new HashMap<String,SortedSet<TermVectorEntry>>();
-  private SortedSet<TermVectorEntry> currentSet;
-  private String currentField;
-  private Comparator<TermVectorEntry> comparator;
+public class FieldSortedTermVectorMapper extends TermVectorMapper {
+    private Map<String, SortedSet<TermVectorEntry>> fieldToTerms = new HashMap<String, SortedSet<TermVectorEntry>>();
+    private SortedSet<TermVectorEntry> currentSet;
+    private String currentField;
+    private Comparator<TermVectorEntry> comparator;
 
-  /**
-   *
-   * @param comparator A Comparator for sorting {@link TermVectorEntry}s
-   */
-  public FieldSortedTermVectorMapper(Comparator<TermVectorEntry> comparator) {
-    this(false, false, comparator);
-  }
-
-
-  public FieldSortedTermVectorMapper(boolean ignoringPositions, boolean ignoringOffsets, Comparator<TermVectorEntry> comparator) {
-    super(ignoringPositions, ignoringOffsets);
-    this.comparator = comparator;
-  }
-
-  @Override
-  public void map(String term, int frequency, TermVectorOffsetInfo[] offsets, int[] positions) {
-    TermVectorEntry entry = new TermVectorEntry(currentField, term, frequency, offsets, positions);
-    currentSet.add(entry);
-  }
-
-  @Override
-  public void setExpectations(String field, int numTerms, boolean storeOffsets, boolean storePositions) {
-    currentSet = new TreeSet<TermVectorEntry>(comparator);
-    currentField = field;
-    fieldToTerms.put(field, currentSet);
-  }
-
-  /**
-   * Get the mapping between fields and terms, sorted by the comparator
-   *
-   * @return A map between field names and {@link java.util.SortedSet}s per field.  SortedSet entries are {@link TermVectorEntry}
-   */
-  public Map<String,SortedSet<TermVectorEntry>> getFieldToTerms() {
-    return fieldToTerms;
-  }
+    /**
+     * @param comparator A Comparator for sorting {@link TermVectorEntry}s
+     */
+    public FieldSortedTermVectorMapper(Comparator<TermVectorEntry> comparator) {
+        this(false, false, comparator);
+    }
 
 
-  public Comparator<TermVectorEntry> getComparator() {
-    return comparator;
-  }
+    public FieldSortedTermVectorMapper(boolean ignoringPositions, boolean ignoringOffsets, Comparator<TermVectorEntry> comparator) {
+        super(ignoringPositions, ignoringOffsets);
+        this.comparator = comparator;
+    }
+
+    @Override
+    public void map(String term, int frequency, TermVectorOffsetInfo[] offsets, int[] positions) {
+        TermVectorEntry entry = new TermVectorEntry(currentField, term, frequency, offsets, positions);
+        currentSet.add(entry);
+    }
+
+    @Override
+    public void setExpectations(String field, int numTerms, boolean storeOffsets, boolean storePositions) {
+        currentSet = new TreeSet<TermVectorEntry>(comparator);
+        currentField = field;
+        fieldToTerms.put(field, currentSet);
+    }
+
+    /**
+     * Get the mapping between fields and terms, sorted by the comparator
+     *
+     * @return A map between field names and {@link java.util.SortedSet}s per field.  SortedSet entries are {@link TermVectorEntry}
+     */
+    public Map<String, SortedSet<TermVectorEntry>> getFieldToTerms() {
+        return fieldToTerms;
+    }
+
+
+    public Comparator<TermVectorEntry> getComparator() {
+        return comparator;
+    }
 }

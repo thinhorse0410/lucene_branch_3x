@@ -7,9 +7,9 @@ package org.apache.lucene.analysis.tokenattributes;
  * The ASF licenses this file to You under the Apache License, Version 2.0
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -42,18 +42,18 @@ import org.apache.lucene.util.Attribute;
  * occur with no intervening stop words.
  *
  * </ul>
- * 
+ *
  * @see org.apache.lucene.index.TermPositions
  */
 public interface PositionIncrementAttribute extends Attribute {
-  /** Set the position increment. The default value is one.
-   *
-   * @param positionIncrement the distance from the prior term
-   */
-  public void setPositionIncrement(int positionIncrement);
+    /** Set the position increment. The default value is one.
+     *
+     * @param positionIncrement the distance from the prior term
+     */
+    public void setPositionIncrement(int positionIncrement);
 
-  /** Returns the position increment of this Token.
-   * @see #setPositionIncrement
-   */
-  public int getPositionIncrement();
+    /** Returns the position increment of this Token.
+     * @see #setPositionIncrement
+     */
+    public int getPositionIncrement();
 }

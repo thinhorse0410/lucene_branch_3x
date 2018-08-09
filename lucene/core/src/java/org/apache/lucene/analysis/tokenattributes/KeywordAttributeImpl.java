@@ -7,9 +7,9 @@ package org.apache.lucene.analysis.tokenattributes;
  * The ASF licenses this file to You under the Apache License, Version 2.0
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -28,55 +28,55 @@ import org.apache.lucene.util.AttributeImpl;
  * {@link #isKeyword()} returns <code>true</code>.
  */
 public final class KeywordAttributeImpl extends AttributeImpl implements
-    KeywordAttribute {
-  private boolean keyword;
+        KeywordAttribute {
+    private boolean keyword;
 
-  @Override
-  public void clear() {
-    keyword = false;
-  }
+    @Override
+    public void clear() {
+        keyword = false;
+    }
 
-  @Override
-  public void copyTo(AttributeImpl target) {
-    KeywordAttribute attr = (KeywordAttribute) target;
-    attr.setKeyword(keyword);
-  }
+    @Override
+    public void copyTo(AttributeImpl target) {
+        KeywordAttribute attr = (KeywordAttribute) target;
+        attr.setKeyword(keyword);
+    }
 
-  @Override
-  public int hashCode() {
-    return keyword ? 31 : 37;
-  }
+    @Override
+    public int hashCode() {
+        return keyword ? 31 : 37;
+    }
 
-  @Override
-  public boolean equals(Object obj) {
-    if (this == obj)
-      return true;
-    if (getClass() != obj.getClass())
-      return false;
-    final KeywordAttributeImpl other = (KeywordAttributeImpl) obj;
-    return keyword == other.keyword;
-  }
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (getClass() != obj.getClass())
+            return false;
+        final KeywordAttributeImpl other = (KeywordAttributeImpl) obj;
+        return keyword == other.keyword;
+    }
 
-  /**
-   * Returns <code>true</code> iff the current token is a keyword, otherwise
-   * <code>false</code>/
-   * 
-   * @return <code>true</code> iff the current token is a keyword, otherwise
-   *         <code>false</code>/
-   */
-  public boolean isKeyword() {
-    return keyword;
-  }
+    /**
+     * Returns <code>true</code> iff the current token is a keyword, otherwise
+     * <code>false</code>/
+     *
+     * @return <code>true</code> iff the current token is a keyword, otherwise
+     *         <code>false</code>/
+     */
+    public boolean isKeyword() {
+        return keyword;
+    }
 
-  /**
-   * Marks the current token as keyword iff set to <code>true</code>.
-   * 
-   * @param isKeyword
-   *          <code>true</code> iff the current token is a keyword, otherwise
-   *          <code>false</code>.
-   */
-  public void setKeyword(boolean isKeyword) {
-    keyword = isKeyword;
-  }
+    /**
+     * Marks the current token as keyword iff set to <code>true</code>.
+     *
+     * @param isKeyword
+     *          <code>true</code> iff the current token is a keyword, otherwise
+     *          <code>false</code>.
+     */
+    public void setKeyword(boolean isKeyword) {
+        keyword = isKeyword;
+    }
 
 }

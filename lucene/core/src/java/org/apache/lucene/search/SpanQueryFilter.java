@@ -1,13 +1,13 @@
 package org.apache.lucene.search;
 /**
  * Copyright 2007 The Apache Software Foundation
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -36,67 +36,64 @@ import java.util.List;
  * caches.
  */
 public class SpanQueryFilter extends SpanFilter {
-  protected SpanQuery query;
+    protected SpanQuery query;
 
-  protected SpanQueryFilter()
-  {
-    
-  }
+    protected SpanQueryFilter() {
 
-  /** Constructs a filter which only matches documents matching
-   * <code>query</code>.
-   * @param query The {@link org.apache.lucene.search.spans.SpanQuery} to use as the basis for the Filter.
-   */
-  public SpanQueryFilter(SpanQuery query) {
-    this.query = query;
-  }
-
-  @Override
-  public DocIdSet getDocIdSet(IndexReader reader) throws IOException {
-    SpanFilterResult result = bitSpans(reader);
-    return result.getDocIdSet();
-  }
-
-  @Override
-  public SpanFilterResult bitSpans(IndexReader reader) throws IOException {
-
-    final FixedBitSet bits = new FixedBitSet(reader.maxDoc());
-    Spans spans = query.getSpans(reader);
-    List<SpanFilterResult.PositionInfo> tmp = new ArrayList<SpanFilterResult.PositionInfo>(20);
-    int currentDoc = -1;
-    SpanFilterResult.PositionInfo currentInfo = null;
-    while (spans.next())
-    {
-      int doc = spans.doc();
-      bits.set(doc);
-      if (currentDoc != doc)
-      {
-        currentInfo = new SpanFilterResult.PositionInfo(doc);
-        tmp.add(currentInfo);
-        currentDoc = doc;
-      }
-      currentInfo.addPosition(spans.start(), spans.end());
     }
-    return new SpanFilterResult(bits, tmp);
-  }
+
+    /** Constructs a filter which only matches documents matching
+     * <code>query</code>.
+     * @param query The {@link org.apache.lucene.search.spans.SpanQuery} to use as the basis for the Filter.
+     */
+    public SpanQueryFilter(SpanQuery query) {
+        this.query = query;
+    }
+
+    @Override
+    public DocIdSet getDocIdSet(IndexReader reader) throws IOException {
+        SpanFilterResult result = bitSpans(reader);
+        return result.getDocIdSet();
+    }
+
+    @Override
+    public SpanFilterResult bitSpans(IndexReader reader) throws IOException {
+
+        final FixedBitSet bits = new FixedBitSet(reader.maxDoc());
+        Spans spans = query.getSpans(reader);
+        List<SpanFilterResult.PositionInfo> tmp = new ArrayList<SpanFilterResult.PositionInfo>(20);
+        int currentDoc = -1;
+        SpanFilterResult.PositionInfo currentInfo = null;
+        while (spans.next()) {
+            int doc = spans.doc();
+            bits.set(doc);
+            if (currentDoc != doc) {
+                currentInfo = new SpanFilterResult.PositionInfo(doc);
+                tmp.add(currentInfo);
+                currentDoc = doc;
+            }
+            currentInfo.addPosition(spans.start(), spans.end());
+        }
+        return new SpanFilterResult(bits, tmp);
+    }
 
 
-  public SpanQuery getQuery() {
-    return query;
-  }
+    public SpanQuery getQuery() {
+        return query;
+    }
 
-  @Override
-  public String toString() {
-    return "SpanQueryFilter(" + query + ")";
-  }
+    @Override
+    public String toString() {
+        return "SpanQueryFilter(" + query + ")";
+    }
 
-  @Override
-  public boolean equals(Object o) {
-    return o instanceof SpanQueryFilter && this.query.equals(((SpanQueryFilter) o).query);
-  }
+    @Override
+    public boolean equals(Object o) {
+        return o instanceof SpanQueryFilter && this.query.equals(((SpanQueryFilter) o).query);
+    }
 
-  @Override
-  public int hashCode() {
-    return query.hashCode() ^ 0x923F64B9;
-  }
+    @Override
+    public int hashCode() {
+        return query.hashCode() ^ 0x923F64B9;
+    }
 }

@@ -7,9 +7,9 @@ package org.apache.lucene.index;
  * The ASF licenses this file to You under the Apache License, Version 2.0
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -18,14 +18,13 @@ package org.apache.lucene.index;
  */
 
 import org.apache.lucene.store.Directory;
-import org.apache.lucene.store.IndexOutput;
 import org.apache.lucene.store.IndexInput;
+import org.apache.lucene.store.IndexOutput;
 import org.apache.lucene.util.IOUtils;
 
-import java.util.LinkedList;
-import java.util.HashSet;
-
 import java.io.IOException;
+import java.util.HashSet;
+import java.util.LinkedList;
 
 /**
  * Combines multiple files into a single compound file.
@@ -46,7 +45,7 @@ import java.io.IOException;
  * file. The {directory} that follows has that many entries. Each directory entry
  * contains a long pointer to the start of this file's data section, and a String
  * with that file's name.
- * 
+ *
  * @lucene.internal
  */
 public final class CompoundFileWriter {
@@ -60,14 +59,14 @@ public final class CompoundFileWriter {
 
         /** temporary holder for the start of this file's data section */
         long dataOffset;
-        
+
         /** the directory which contains the file. */
         Directory dir;
     }
 
     // Before versioning started.
     static final int FORMAT_PRE_VERSION = 0;
-    
+
     // Segment name is not written in the file names.
     static final int FORMAT_NO_SEGMENT_PREFIX = -1;
 
@@ -88,7 +87,7 @@ public final class CompoundFileWriter {
      *  @throws NullPointerException if <code>dir</code> or <code>name</code> is null
      */
     public CompoundFileWriter(Directory dir, String name) {
-      this(dir, name, null);
+        this(dir, name, null);
     }
 
     CompoundFileWriter(Directory dir, String name, SegmentMerger.CheckAbort checkAbort) {
@@ -115,14 +114,14 @@ public final class CompoundFileWriter {
 
     /** Add a source stream. <code>file</code> is the string by which the 
      *  sub-stream will be known in the compound stream.
-     * 
+     *
      *  @throws IllegalStateException if this writer is closed
      *  @throws NullPointerException if <code>file</code> is null
      *  @throws IllegalArgumentException if a file with the same name
      *   has been added already
      */
     public void addFile(String file) {
-      addFile(file, directory);
+        addFile(file, directory);
     }
 
     /**
@@ -132,15 +131,15 @@ public final class CompoundFileWriter {
     public void addFile(String file, Directory dir) {
         if (merged)
             throw new IllegalStateException(
-                "Can't add extensions after merge has been called");
+                    "Can't add extensions after merge has been called");
 
         if (file == null)
             throw new NullPointerException(
-                "file cannot be null");
+                    "file cannot be null");
 
-        if (! ids.add(file))
+        if (!ids.add(file))
             throw new IllegalArgumentException(
-                "File " + file + " already added");
+                    "File " + file + " already added");
 
         FileEntry entry = new FileEntry();
         entry.file = file;
@@ -170,7 +169,7 @@ public final class CompoundFileWriter {
             // Write the Version info - must be a VInt because CFR reads a VInt
             // in older versions!
             os.writeVInt(FORMAT_CURRENT);
-            
+
             // Write the number of entries
             os.writeVInt(entries.size());
 
@@ -191,7 +190,7 @@ public final class CompoundFileWriter {
             // searching.  It also uncovers a disk-full
             // situation earlier and hopefully without
             // actually filling disk to 100%:
-            final long finalLength = totalSize+os.getFilePointer();
+            final long finalLength = totalSize + os.getFilePointer();
             os.setLength(finalLength);
 
             // Open the files and copy their data into the stream.
@@ -217,36 +216,36 @@ public final class CompoundFileWriter {
             os = null;
             tmp.close();
         } catch (IOException e) {
-          priorException = e;
+            priorException = e;
         } finally {
-          IOUtils.closeWhileHandlingException(priorException, os);
+            IOUtils.closeWhileHandlingException(priorException, os);
         }
     }
 
-  /**
-   * Copy the contents of the file with specified extension into the provided
-   * output stream.
-   */
-  private void copyFile(FileEntry source, IndexOutput os) throws IOException {
-    IndexInput is = source.dir.openInput(source.file);
-    try {
-      long startPtr = os.getFilePointer();
-      long length = is.length();
-      os.copyBytes(is, length);
+    /**
+     * Copy the contents of the file with specified extension into the provided
+     * output stream.
+     */
+    private void copyFile(FileEntry source, IndexOutput os) throws IOException {
+        IndexInput is = source.dir.openInput(source.file);
+        try {
+            long startPtr = os.getFilePointer();
+            long length = is.length();
+            os.copyBytes(is, length);
 
-      if (checkAbort != null) {
-        checkAbort.work(length);
-      }
+            if (checkAbort != null) {
+                checkAbort.work(length);
+            }
 
-      // Verify that the output length diff is equal to original file
-      long endPtr = os.getFilePointer();
-      long diff = endPtr - startPtr;
-      if (diff != length)
-        throw new IOException("Difference in the output file offsets " + diff
-            + " does not match the original file length " + length);
+            // Verify that the output length diff is equal to original file
+            long endPtr = os.getFilePointer();
+            long diff = endPtr - startPtr;
+            if (diff != length)
+                throw new IOException("Difference in the output file offsets " + diff
+                        + " does not match the original file length " + length);
 
-    } finally {
-      is.close();
+        } finally {
+            is.close();
+        }
     }
-  }
 }

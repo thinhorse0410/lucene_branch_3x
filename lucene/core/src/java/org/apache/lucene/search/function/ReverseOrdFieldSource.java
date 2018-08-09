@@ -5,9 +5,9 @@
  * The ASF licenses this file to You under the Apache License, Version 2.0
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -39,7 +39,7 @@ import java.io.IOException;
  * rord() depends on the position in an index and can thus change 
  * when other documents are inserted or deleted,
  * or if a MultiSearcher is used. 
- * 
+ *
  * @lucene.experimental
  *
  * <p><b>NOTE</b>: with the switch in 2.9 to segment-based
@@ -51,75 +51,79 @@ import java.io.IOException;
  */
 
 public class ReverseOrdFieldSource extends ValueSource {
-  public String field;
+    public String field;
 
-  /** 
-   * Contructor for a certain field.
-   * @param field field whose values reverse order is used.  
-   */
-  public ReverseOrdFieldSource(String field) {
-    this.field = field;
-  }
+    /**
+     * Contructor for a certain field.
+     * @param field field whose values reverse order is used.
+     */
+    public ReverseOrdFieldSource(String field) {
+        this.field = field;
+    }
 
-  /*(non-Javadoc) @see org.apache.lucene.search.function.ValueSource#description() */
-  @Override
-  public String description() {
-    return "rord("+field+')';
-  }
+    /*(non-Javadoc) @see org.apache.lucene.search.function.ValueSource#description() */
+    @Override
+    public String description() {
+        return "rord(" + field + ')';
+    }
 
-  /*(non-Javadoc) @see org.apache.lucene.search.function.ValueSource#getValues(org.apache.lucene.index.IndexReader) */
-  @Override
-  public DocValues getValues(IndexReader reader) throws IOException {
-    final FieldCache.StringIndex sindex = FieldCache.DEFAULT.getStringIndex(reader, field);
+    /*(non-Javadoc) @see org.apache.lucene.search.function.ValueSource#getValues(org.apache.lucene.index.IndexReader) */
+    @Override
+    public DocValues getValues(IndexReader reader) throws IOException {
+        final FieldCache.StringIndex sindex = FieldCache.DEFAULT.getStringIndex(reader, field);
 
-    final int arr[] = sindex.order;
-    final int end = sindex.lookup.length;
+        final int arr[] = sindex.order;
+        final int end = sindex.lookup.length;
 
-    return new DocValues() {
-      /*(non-Javadoc) @see org.apache.lucene.search.function.DocValues#floatVal(int) */
-      @Override
-      public float floatVal(int doc) {
-        return (end - arr[doc]);
-      }
-      /* (non-Javadoc) @see org.apache.lucene.search.function.DocValues#intVal(int) */
-      @Override
-      public int intVal(int doc) {
-        return end - arr[doc];
-      }
-      /* (non-Javadoc) @see org.apache.lucene.search.function.DocValues#strVal(int) */
-      @Override
-      public String strVal(int doc) {
-        // the string value of the ordinal, not the string itself
-        return Integer.toString(intVal(doc));
-      }
-      /*(non-Javadoc) @see org.apache.lucene.search.function.DocValues#toString(int) */
-      @Override
-      public String toString(int doc) {
-        return description() + '=' + strVal(doc);
-      }
-      /*(non-Javadoc) @see org.apache.lucene.search.function.DocValues#getInnerArray() */
-      @Override
-      Object getInnerArray() {
-        return arr;
-      }
-    };
-  }
+        return new DocValues() {
+            /*(non-Javadoc) @see org.apache.lucene.search.function.DocValues#floatVal(int) */
+            @Override
+            public float floatVal(int doc) {
+                return (end - arr[doc]);
+            }
 
-  /*(non-Javadoc) @see java.lang.Object#equals(java.lang.Object) */
-  @Override
-  public boolean equals(Object o) {
-    if (o == this) return true;
-    if (o == null) return false;
-    if (o.getClass() != ReverseOrdFieldSource.class) return false;
-    ReverseOrdFieldSource other = (ReverseOrdFieldSource)o;
-    return this.field.equals(other.field); 
-  }
+            /* (non-Javadoc) @see org.apache.lucene.search.function.DocValues#intVal(int) */
+            @Override
+            public int intVal(int doc) {
+                return end - arr[doc];
+            }
 
-  private static final int hcode = ReverseOrdFieldSource.class.hashCode();
-  
-  /*(non-Javadoc) @see java.lang.Object#hashCode() */
-  @Override
-  public int hashCode() {
-    return hcode + field.hashCode();
-  }
+            /* (non-Javadoc) @see org.apache.lucene.search.function.DocValues#strVal(int) */
+            @Override
+            public String strVal(int doc) {
+                // the string value of the ordinal, not the string itself
+                return Integer.toString(intVal(doc));
+            }
+
+            /*(non-Javadoc) @see org.apache.lucene.search.function.DocValues#toString(int) */
+            @Override
+            public String toString(int doc) {
+                return description() + '=' + strVal(doc);
+            }
+
+            /*(non-Javadoc) @see org.apache.lucene.search.function.DocValues#getInnerArray() */
+            @Override
+            Object getInnerArray() {
+                return arr;
+            }
+        };
+    }
+
+    /*(non-Javadoc) @see java.lang.Object#equals(java.lang.Object) */
+    @Override
+    public boolean equals(Object o) {
+        if (o == this) return true;
+        if (o == null) return false;
+        if (o.getClass() != ReverseOrdFieldSource.class) return false;
+        ReverseOrdFieldSource other = (ReverseOrdFieldSource) o;
+        return this.field.equals(other.field);
+    }
+
+    private static final int hcode = ReverseOrdFieldSource.class.hashCode();
+
+    /*(non-Javadoc) @see java.lang.Object#hashCode() */
+    @Override
+    public int hashCode() {
+        return hcode + field.hashCode();
+    }
 }

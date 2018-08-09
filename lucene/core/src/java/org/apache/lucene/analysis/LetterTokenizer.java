@@ -7,9 +7,9 @@ package org.apache.lucene.analysis;
  * The ASF licenses this file to You under the Apache License, Version 2.0
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,10 +17,10 @@ package org.apache.lucene.analysis;
  * limitations under the License.
  */
 
-import java.io.Reader;
-
 import org.apache.lucene.util.AttributeSource;
 import org.apache.lucene.util.Version;
+
+import java.io.Reader;
 
 /**
  * A LetterTokenizer is a tokenizer that divides text at non-letters. That's to
@@ -43,86 +43,86 @@ import org.apache.lucene.util.Version;
  */
 
 public class LetterTokenizer extends CharTokenizer {
-  
-  /**
-   * Construct a new LetterTokenizer.
-   * 
-   * @param matchVersion
-   *          Lucene version to match See {@link <a href="#version">above</a>}
-   * @param in
-   *          the input to split up into tokens
-   */
-  public LetterTokenizer(Version matchVersion, Reader in) {
-    super(matchVersion, in);
-  }
-  
-  /**
-   * Construct a new LetterTokenizer using a given {@link AttributeSource}.
-   * 
-   * @param matchVersion
-   *          Lucene version to match See {@link <a href="#version">above</a>}
-   * @param source
-   *          the attribute source to use for this {@link Tokenizer}
-   * @param in
-   *          the input to split up into tokens
-   */
-  public LetterTokenizer(Version matchVersion, AttributeSource source, Reader in) {
-    super(matchVersion, source, in);
-  }
-  
-  /**
-   * Construct a new LetterTokenizer using a given
-   * {@link org.apache.lucene.util.AttributeSource.AttributeFactory}.
-   * 
-   * @param matchVersion
-   *          Lucene version to match See {@link <a href="#version">above</a>}
-   * @param factory
-   *          the attribute factory to use for this {@link Tokenizer}
-   * @param in
-   *          the input to split up into tokens
-   */
-  public LetterTokenizer(Version matchVersion, AttributeFactory factory, Reader in) {
-    super(matchVersion, factory, in);
-  }
-  
-  /**
-   * Construct a new LetterTokenizer.
-   * 
-   * @deprecated use {@link #LetterTokenizer(Version, Reader)} instead. This
-   *             will be removed in Lucene 4.0.
-   */
-  @Deprecated
-  public LetterTokenizer(Reader in) {
-    super(Version.LUCENE_30, in);
-  }
-  
-  /**
-   * Construct a new LetterTokenizer using a given {@link AttributeSource}. 
-   * @deprecated
-   * use {@link #LetterTokenizer(Version, AttributeSource, Reader)} instead.
-   * This will be removed in Lucene 4.0.
-   */
-  @Deprecated
-  public LetterTokenizer(AttributeSource source, Reader in) {
-    super(Version.LUCENE_30, source, in);
-  }
-  
-  /**
-   * Construct a new LetterTokenizer using a given
-   * {@link org.apache.lucene.util.AttributeSource.AttributeFactory}.
-   * 
-   * @deprecated use {@link #LetterTokenizer(Version, AttributeSource.AttributeFactory, Reader)}
-   *             instead. This will be removed in Lucene 4.0.
-   */
-  @Deprecated
-  public LetterTokenizer(AttributeFactory factory, Reader in) {
-    super(Version.LUCENE_30, factory, in);
-  }
-  
-  /** Collects only characters which satisfy
-   * {@link Character#isLetter(int)}.*/
-  @Override
-  protected boolean isTokenChar(int c) {
-    return Character.isLetter(c);
-  }
+
+    /**
+     * Construct a new LetterTokenizer.
+     *
+     * @param matchVersion
+     *          Lucene version to match See {@link <a href="#version">above</a>}
+     * @param in
+     *          the input to split up into tokens
+     */
+    public LetterTokenizer(Version matchVersion, Reader in) {
+        super(matchVersion, in);
+    }
+
+    /**
+     * Construct a new LetterTokenizer using a given {@link AttributeSource}.
+     *
+     * @param matchVersion
+     *          Lucene version to match See {@link <a href="#version">above</a>}
+     * @param source
+     *          the attribute source to use for this {@link Tokenizer}
+     * @param in
+     *          the input to split up into tokens
+     */
+    public LetterTokenizer(Version matchVersion, AttributeSource source, Reader in) {
+        super(matchVersion, source, in);
+    }
+
+    /**
+     * Construct a new LetterTokenizer using a given
+     * {@link org.apache.lucene.util.AttributeSource.AttributeFactory}.
+     *
+     * @param matchVersion
+     *          Lucene version to match See {@link <a href="#version">above</a>}
+     * @param factory
+     *          the attribute factory to use for this {@link Tokenizer}
+     * @param in
+     *          the input to split up into tokens
+     */
+    public LetterTokenizer(Version matchVersion, AttributeFactory factory, Reader in) {
+        super(matchVersion, factory, in);
+    }
+
+    /**
+     * Construct a new LetterTokenizer.
+     *
+     * @deprecated use {@link #LetterTokenizer(Version, Reader)} instead. This
+     *             will be removed in Lucene 4.0.
+     */
+    @Deprecated
+    public LetterTokenizer(Reader in) {
+        super(Version.LUCENE_30, in);
+    }
+
+    /**
+     * Construct a new LetterTokenizer using a given {@link AttributeSource}.
+     * @deprecated
+     * use {@link #LetterTokenizer(Version, AttributeSource, Reader)} instead.
+     * This will be removed in Lucene 4.0.
+     */
+    @Deprecated
+    public LetterTokenizer(AttributeSource source, Reader in) {
+        super(Version.LUCENE_30, source, in);
+    }
+
+    /**
+     * Construct a new LetterTokenizer using a given
+     * {@link org.apache.lucene.util.AttributeSource.AttributeFactory}.
+     *
+     * @deprecated use {@link #LetterTokenizer(Version, AttributeSource.AttributeFactory, Reader)}
+     *             instead. This will be removed in Lucene 4.0.
+     */
+    @Deprecated
+    public LetterTokenizer(AttributeFactory factory, Reader in) {
+        super(Version.LUCENE_30, factory, in);
+    }
+
+    /** Collects only characters which satisfy
+     * {@link Character#isLetter(int)}.*/
+    @Override
+    protected boolean isTokenChar(int c) {
+        return Character.isLetter(c);
+    }
 }

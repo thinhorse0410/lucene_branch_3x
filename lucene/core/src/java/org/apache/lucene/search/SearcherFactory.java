@@ -7,9 +7,9 @@ package org.apache.lucene.search;
  * The ASF licenses this file to You under the Apache License, Version 2.0
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,25 +17,24 @@ package org.apache.lucene.search;
  * limitations under the License.
  */
 
-import java.io.IOException;
-import java.util.concurrent.ExecutorService; // javadocs
-
 import org.apache.lucene.index.IndexReader;
-import org.apache.lucene.index.IndexWriter; // javadocs
-import org.apache.lucene.index.IndexWriterConfig; // javadocs
-import org.apache.lucene.search.Similarity; // javadocs
+import org.apache.lucene.index.IndexWriter;
+import org.apache.lucene.index.IndexWriterConfig;
+
+import java.io.IOException;
+import java.util.concurrent.ExecutorService;
 
 /**
  * Factory class used by {@link SearcherManager} and {@link NRTManager} to
  * create new IndexSearchers. The default implementation just creates 
  * an IndexSearcher with no custom behavior:
- * 
+ *
  * <pre class="prettyprint">
  *   public IndexSearcher newSearcher(IndexReader r) throws IOException {
  *     return new IndexSearcher(r);
  *   }
  * </pre>
- * 
+ *
  * You can pass your own factory instead if you want custom behavior, such as:
  * <ul>
  *   <li>Setting a custom scoring model: {@link IndexSearcher#setSimilarity(Similarity)}
@@ -48,10 +47,10 @@ import org.apache.lucene.search.Similarity; // javadocs
  * @lucene.experimental
  */
 public class SearcherFactory {
-  /** 
-   * Returns a new IndexSearcher over the given reader. 
-   */
-  public IndexSearcher newSearcher(IndexReader reader) throws IOException {
-    return new IndexSearcher(reader);
-  }
+    /**
+     * Returns a new IndexSearcher over the given reader.
+     */
+    public IndexSearcher newSearcher(IndexReader reader) throws IOException {
+        return new IndexSearcher(reader);
+    }
 }

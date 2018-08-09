@@ -7,9 +7,9 @@ package org.apache.lucene.search.function;
  * The ASF licenses this file to You under the Apache License, Version 2.0
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,10 +17,10 @@ package org.apache.lucene.search.function;
  * limitations under the License.
  */
 
-import java.io.IOException;
-
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.search.FieldCache;
+
+import java.io.IOException;
 
 /**
  * Expert: A base class for ValueSource implementations that retrieve values for
@@ -33,7 +33,7 @@ import org.apache.lucene.search.FieldCache;
  * code would use the value of one of these tokens, but this is not guaranteed).
  * <p>
  * Document with no tokens in this field are assigned the <code>Zero</code> value.    
- * 
+ *
  * @lucene.experimental
  *
  * <p><b>NOTE</b>: with the switch in 2.9 to segment-based
@@ -44,65 +44,65 @@ import org.apache.lucene.search.FieldCache;
  * (single segment) readers to this API.</p>
  */
 public abstract class FieldCacheSource extends ValueSource {
-  private String field;
+    private String field;
 
-  /**
-   * Create a cached field source for the input field.  
-   */
-  public FieldCacheSource(String field) {
-    this.field=field;
-  }
-
-  /* (non-Javadoc) @see org.apache.lucene.search.function.ValueSource#getValues(org.apache.lucene.index.IndexReader) */
-  @Override
-  public final DocValues getValues(IndexReader reader) throws IOException {
-    return getCachedFieldValues(FieldCache.DEFAULT, field, reader);
-  }
-
-  /* (non-Javadoc) @see org.apache.lucene.search.function.ValueSource#description() */
-  @Override
-  public String description() {
-    return field;
-  }
-
-  /**
-   * Return cached DocValues for input field and reader.
-   * @param cache FieldCache so that values of a field are loaded once per reader (RAM allowing)
-   * @param field Field for which values are required.
-   * @see ValueSource
-   */
-  public abstract DocValues getCachedFieldValues(FieldCache cache, String field, IndexReader reader) throws IOException;
-
-  /*(non-Javadoc) @see java.lang.Object#equals(java.lang.Object) */
-  @Override
-  public final boolean equals(Object o) {
-    if (!(o instanceof FieldCacheSource)) {
-      return false;
+    /**
+     * Create a cached field source for the input field.
+     */
+    public FieldCacheSource(String field) {
+        this.field = field;
     }
-    FieldCacheSource other = (FieldCacheSource) o;
-    return 
-      this.field.equals(other.field) && 
-      cachedFieldSourceEquals(other);
-  }
 
-  /*(non-Javadoc) @see java.lang.Object#hashCode() */
-  @Override
-  public final int hashCode() {
-    return 
-      field.hashCode() +
-      cachedFieldSourceHashCode();
-  }
+    /* (non-Javadoc) @see org.apache.lucene.search.function.ValueSource#getValues(org.apache.lucene.index.IndexReader) */
+    @Override
+    public final DocValues getValues(IndexReader reader) throws IOException {
+        return getCachedFieldValues(FieldCache.DEFAULT, field, reader);
+    }
 
-  /**
-   * Check if equals to another {@link FieldCacheSource}, already knowing that cache and field are equal.  
-   * @see Object#equals(java.lang.Object)
-   */
-  public abstract boolean cachedFieldSourceEquals(FieldCacheSource other);
+    /* (non-Javadoc) @see org.apache.lucene.search.function.ValueSource#description() */
+    @Override
+    public String description() {
+        return field;
+    }
 
-  /**
-   * Return a hash code of a {@link FieldCacheSource}, without the hash-codes of the field 
-   * and the cache (those are taken care of elsewhere).  
-   * @see Object#hashCode()
-   */
-  public abstract int cachedFieldSourceHashCode();
+    /**
+     * Return cached DocValues for input field and reader.
+     * @param cache FieldCache so that values of a field are loaded once per reader (RAM allowing)
+     * @param field Field for which values are required.
+     * @see ValueSource
+     */
+    public abstract DocValues getCachedFieldValues(FieldCache cache, String field, IndexReader reader) throws IOException;
+
+    /*(non-Javadoc) @see java.lang.Object#equals(java.lang.Object) */
+    @Override
+    public final boolean equals(Object o) {
+        if (!(o instanceof FieldCacheSource)) {
+            return false;
+        }
+        FieldCacheSource other = (FieldCacheSource) o;
+        return
+                this.field.equals(other.field) &&
+                        cachedFieldSourceEquals(other);
+    }
+
+    /*(non-Javadoc) @see java.lang.Object#hashCode() */
+    @Override
+    public final int hashCode() {
+        return
+                field.hashCode() +
+                        cachedFieldSourceHashCode();
+    }
+
+    /**
+     * Check if equals to another {@link FieldCacheSource}, already knowing that cache and field are equal.
+     * @see Object#equals(java.lang.Object)
+     */
+    public abstract boolean cachedFieldSourceEquals(FieldCacheSource other);
+
+    /**
+     * Return a hash code of a {@link FieldCacheSource}, without the hash-codes of the field
+     * and the cache (those are taken care of elsewhere).
+     * @see Object#hashCode()
+     */
+    public abstract int cachedFieldSourceHashCode();
 }

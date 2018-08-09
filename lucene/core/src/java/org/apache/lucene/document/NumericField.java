@@ -7,9 +7,9 @@ package org.apache.lucene.document;
  * The ASF licenses this file to You under the Apache License, Version 2.0
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,16 +17,16 @@ package org.apache.lucene.document;
  * limitations under the License.
  */
 
-import java.io.Reader;
-
-import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.NumericTokenStream;
+import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.index.FieldInfo.IndexOptions;
+import org.apache.lucene.search.FieldCache;
+import org.apache.lucene.search.NumericRangeFilter;
+import org.apache.lucene.search.NumericRangeQuery;
+import org.apache.lucene.search.SortField;
 import org.apache.lucene.util.NumericUtils;
-import org.apache.lucene.search.NumericRangeQuery; // javadocs
-import org.apache.lucene.search.NumericRangeFilter; // javadocs
-import org.apache.lucene.search.SortField; // javadocs
-import org.apache.lucene.search.FieldCache; // javadocs
+
+import java.io.Reader;
 
 /**
  * <p>This class provides a {@link Field} that enables indexing
@@ -75,7 +75,7 @@ import org.apache.lucene.search.FieldCache; // javadocs
  *
  * <p>By default, a <code>NumericField</code>'s value is not stored but
  * is indexed for range filtering and sorting.  You can use
- * the {@link #NumericField(String,Field.Store,boolean)}
+ * the {@link #NumericField(String, Field.Store, boolean)}
  * constructor if you need to change these defaults.</p>
  *
  * <p>You may add the same field name as a <code>NumericField</code> to
@@ -103,7 +103,7 @@ import org.apache.lucene.search.FieldCache; // javadocs
  * default value, 4, was selected for a reasonable tradeoff
  * of disk space consumption versus performance.  You can
  * use the expert constructor {@link
- * #NumericField(String,int,Field.Store,boolean)} if you'd
+ * #NumericField(String, int, Field.Store, boolean)} if you'd
  * like to change the value.  Note that you must also
  * specify a congruent value when creating {@link
  * NumericRangeQuery} or {@link NumericRangeFilter}.
@@ -132,188 +132,194 @@ import org.apache.lucene.search.FieldCache; // javadocs
  */
 public final class NumericField extends AbstractField {
 
-  /** Data type of the value in {@link NumericField}.
-   * @since 3.2
-   */
-  public static enum DataType { INT, LONG, FLOAT, DOUBLE }
-
-  private transient NumericTokenStream numericTS;
-  private DataType type;
-  private final int precisionStep;
-
-  /**
-   * Creates a field for numeric values using the default <code>precisionStep</code>
-   * {@link NumericUtils#PRECISION_STEP_DEFAULT} (4). The instance is not yet initialized with
-   * a numeric value, before indexing a document containing this field,
-   * set a value using the various set<em>???</em>Value() methods.
-   * This constructor creates an indexed, but not stored field.
-   * @param name the field name
-   */
-  public NumericField(String name) {
-    this(name, NumericUtils.PRECISION_STEP_DEFAULT, Field.Store.NO, true);
-  }
-  
-  /**
-   * Creates a field for numeric values using the default <code>precisionStep</code>
-   * {@link NumericUtils#PRECISION_STEP_DEFAULT} (4). The instance is not yet initialized with
-   * a numeric value, before indexing a document containing this field,
-   * set a value using the various set<em>???</em>Value() methods.
-   * @param name the field name
-   * @param store if the field should be stored, {@link Document#getFieldable}
-   * then returns {@code NumericField} instances on search results.
-   * @param index if the field should be indexed using {@link NumericTokenStream}
-   */
-  public NumericField(String name, Field.Store store, boolean index) {
-    this(name, NumericUtils.PRECISION_STEP_DEFAULT, store, index);
-  }
-  
-  /**
-   * Creates a field for numeric values with the specified
-   * <code>precisionStep</code>. The instance is not yet initialized with
-   * a numeric value, before indexing a document containing this field,
-   * set a value using the various set<em>???</em>Value() methods.
-   * This constructor creates an indexed, but not stored field.
-   * @param name the field name
-   * @param precisionStep the used <a href="../search/NumericRangeQuery.html#precisionStepDesc">precision step</a>
-   */
-  public NumericField(String name, int precisionStep) {
-    this(name, precisionStep, Field.Store.NO, true);
-  }
-
-  /**
-   * Creates a field for numeric values with the specified
-   * <code>precisionStep</code>. The instance is not yet initialized with
-   * a numeric value, before indexing a document containing this field,
-   * set a value using the various set<em>???</em>Value() methods.
-   * @param name the field name
-   * @param precisionStep the used <a href="../search/NumericRangeQuery.html#precisionStepDesc">precision step</a>
-   * @param store if the field should be stored, {@link Document#getFieldable}
-   * then returns {@code NumericField} instances on search results.
-   * @param index if the field should be indexed using {@link NumericTokenStream}
-   */
-  public NumericField(String name, int precisionStep, Field.Store store, boolean index) {
-    super(name, store, index ? Field.Index.ANALYZED_NO_NORMS : Field.Index.NO, Field.TermVector.NO);
-    if (precisionStep < 1)
-      throw new IllegalArgumentException("precisionStep must be >=1");
-    this.precisionStep = precisionStep;
-    setIndexOptions(IndexOptions.DOCS_ONLY);
-  }
-
-  /** Returns a {@link NumericTokenStream} for indexing the numeric value. */
-  public TokenStream tokenStreamValue()   {
-    if (!isIndexed())
-      return null;
-    if (numericTS == null) {
-      // lazy init the TokenStream as it is heavy to instantiate (attributes,...),
-      // if not needed (stored field loading)
-      numericTS = new NumericTokenStream(precisionStep);
-      // initialize value in TokenStream
-      if (fieldsData != null) {
-        assert type != null;
-        final Number val = (Number) fieldsData;
-        switch (type) {
-          case INT:
-            numericTS.setIntValue(val.intValue()); break;
-          case LONG:
-            numericTS.setLongValue(val.longValue()); break;
-          case FLOAT:
-            numericTS.setFloatValue(val.floatValue()); break;
-          case DOUBLE:
-            numericTS.setDoubleValue(val.doubleValue()); break;
-          default:
-            assert false : "Should never get here";
-        }
-      }
+    /** Data type of the value in {@link NumericField}.
+     * @since 3.2
+     */
+    public static enum DataType {
+        INT, LONG, FLOAT, DOUBLE
     }
-    return numericTS;
-  }
-  
-  /** Returns always <code>null</code> for numeric fields */
-  @Override
-  public byte[] getBinaryValue(byte[] result){
-    return null;
-  }
 
-  /** Returns always <code>null</code> for numeric fields */
-  public Reader readerValue() {
-    return null;
-  }
-    
-  /** Returns the numeric value as a string. This format is also returned if you call {@link Document#get(String)}
-   * on search results. It is recommended to use {@link Document#getFieldable} instead
-   * that returns {@code NumericField} instances. You can then use {@link #getNumericValue}
-   * to return the stored value. */
-  public String stringValue()   {
-    return (fieldsData == null) ? null : fieldsData.toString();
-  }
-  
-  /** Returns the current numeric value as a subclass of {@link Number}, <code>null</code> if not yet initialized. */
-  public Number getNumericValue() {
-    return (Number) fieldsData;
-  }
-  
-  /** Returns the precision step. */
-  public int getPrecisionStep() {
-    return precisionStep;
-  }
-  
-  /** Returns the data type of the current value, {@code null} if not yet set.
-   * @since 3.2
-   */
-  public DataType getDataType() {
-    return type;
-  }
-  
-  /**
-   * Initializes the field with the supplied <code>long</code> value.
-   * @param value the numeric value
-   * @return this instance, because of this you can use it the following way:
-   * <code>document.add(new NumericField(name, precisionStep).setLongValue(value))</code>
-   */
-  public NumericField setLongValue(final long value) {
-    if (numericTS != null) numericTS.setLongValue(value);
-    fieldsData = Long.valueOf(value);
-    type = DataType.LONG;
-    return this;
-  }
-  
-  /**
-   * Initializes the field with the supplied <code>int</code> value.
-   * @param value the numeric value
-   * @return this instance, because of this you can use it the following way:
-   * <code>document.add(new NumericField(name, precisionStep).setIntValue(value))</code>
-   */
-  public NumericField setIntValue(final int value) {
-    if (numericTS != null) numericTS.setIntValue(value);
-    fieldsData = Integer.valueOf(value);
-    type = DataType.INT;
-    return this;
-  }
-  
-  /**
-   * Initializes the field with the supplied <code>double</code> value.
-   * @param value the numeric value
-   * @return this instance, because of this you can use it the following way:
-   * <code>document.add(new NumericField(name, precisionStep).setDoubleValue(value))</code>
-   */
-  public NumericField setDoubleValue(final double value) {
-    if (numericTS != null) numericTS.setDoubleValue(value);
-    fieldsData = Double.valueOf(value);
-    type = DataType.DOUBLE;
-    return this;
-  }
-  
-  /**
-   * Initializes the field with the supplied <code>float</code> value.
-   * @param value the numeric value
-   * @return this instance, because of this you can use it the following way:
-   * <code>document.add(new NumericField(name, precisionStep).setFloatValue(value))</code>
-   */
-  public NumericField setFloatValue(final float value) {
-    if (numericTS != null) numericTS.setFloatValue(value);
-    fieldsData = Float.valueOf(value);
-    type = DataType.FLOAT;
-    return this;
-  }
+    private transient NumericTokenStream numericTS;
+    private DataType type;
+    private final int precisionStep;
+
+    /**
+     * Creates a field for numeric values using the default <code>precisionStep</code>
+     * {@link NumericUtils#PRECISION_STEP_DEFAULT} (4). The instance is not yet initialized with
+     * a numeric value, before indexing a document containing this field,
+     * set a value using the various set<em>???</em>Value() methods.
+     * This constructor creates an indexed, but not stored field.
+     * @param name the field name
+     */
+    public NumericField(String name) {
+        this(name, NumericUtils.PRECISION_STEP_DEFAULT, Field.Store.NO, true);
+    }
+
+    /**
+     * Creates a field for numeric values using the default <code>precisionStep</code>
+     * {@link NumericUtils#PRECISION_STEP_DEFAULT} (4). The instance is not yet initialized with
+     * a numeric value, before indexing a document containing this field,
+     * set a value using the various set<em>???</em>Value() methods.
+     * @param name the field name
+     * @param store if the field should be stored, {@link Document#getFieldable}
+     * then returns {@code NumericField} instances on search results.
+     * @param index if the field should be indexed using {@link NumericTokenStream}
+     */
+    public NumericField(String name, Field.Store store, boolean index) {
+        this(name, NumericUtils.PRECISION_STEP_DEFAULT, store, index);
+    }
+
+    /**
+     * Creates a field for numeric values with the specified
+     * <code>precisionStep</code>. The instance is not yet initialized with
+     * a numeric value, before indexing a document containing this field,
+     * set a value using the various set<em>???</em>Value() methods.
+     * This constructor creates an indexed, but not stored field.
+     * @param name the field name
+     * @param precisionStep the used <a href="../search/NumericRangeQuery.html#precisionStepDesc">precision step</a>
+     */
+    public NumericField(String name, int precisionStep) {
+        this(name, precisionStep, Field.Store.NO, true);
+    }
+
+    /**
+     * Creates a field for numeric values with the specified
+     * <code>precisionStep</code>. The instance is not yet initialized with
+     * a numeric value, before indexing a document containing this field,
+     * set a value using the various set<em>???</em>Value() methods.
+     * @param name the field name
+     * @param precisionStep the used <a href="../search/NumericRangeQuery.html#precisionStepDesc">precision step</a>
+     * @param store if the field should be stored, {@link Document#getFieldable}
+     * then returns {@code NumericField} instances on search results.
+     * @param index if the field should be indexed using {@link NumericTokenStream}
+     */
+    public NumericField(String name, int precisionStep, Field.Store store, boolean index) {
+        super(name, store, index ? Field.Index.ANALYZED_NO_NORMS : Field.Index.NO, Field.TermVector.NO);
+        if (precisionStep < 1)
+            throw new IllegalArgumentException("precisionStep must be >=1");
+        this.precisionStep = precisionStep;
+        setIndexOptions(IndexOptions.DOCS_ONLY);
+    }
+
+    /** Returns a {@link NumericTokenStream} for indexing the numeric value. */
+    public TokenStream tokenStreamValue() {
+        if (!isIndexed())
+            return null;
+        if (numericTS == null) {
+            // lazy init the TokenStream as it is heavy to instantiate (attributes,...),
+            // if not needed (stored field loading)
+            numericTS = new NumericTokenStream(precisionStep);
+            // initialize value in TokenStream
+            if (fieldsData != null) {
+                assert type != null;
+                final Number val = (Number) fieldsData;
+                switch (type) {
+                    case INT:
+                        numericTS.setIntValue(val.intValue());
+                        break;
+                    case LONG:
+                        numericTS.setLongValue(val.longValue());
+                        break;
+                    case FLOAT:
+                        numericTS.setFloatValue(val.floatValue());
+                        break;
+                    case DOUBLE:
+                        numericTS.setDoubleValue(val.doubleValue());
+                        break;
+                    default:
+                        assert false : "Should never get here";
+                }
+            }
+        }
+        return numericTS;
+    }
+
+    /** Returns always <code>null</code> for numeric fields */
+    @Override
+    public byte[] getBinaryValue(byte[] result) {
+        return null;
+    }
+
+    /** Returns always <code>null</code> for numeric fields */
+    public Reader readerValue() {
+        return null;
+    }
+
+    /** Returns the numeric value as a string. This format is also returned if you call {@link Document#get(String)}
+     * on search results. It is recommended to use {@link Document#getFieldable} instead
+     * that returns {@code NumericField} instances. You can then use {@link #getNumericValue}
+     * to return the stored value. */
+    public String stringValue() {
+        return (fieldsData == null) ? null : fieldsData.toString();
+    }
+
+    /** Returns the current numeric value as a subclass of {@link Number}, <code>null</code> if not yet initialized. */
+    public Number getNumericValue() {
+        return (Number) fieldsData;
+    }
+
+    /** Returns the precision step. */
+    public int getPrecisionStep() {
+        return precisionStep;
+    }
+
+    /** Returns the data type of the current value, {@code null} if not yet set.
+     * @since 3.2
+     */
+    public DataType getDataType() {
+        return type;
+    }
+
+    /**
+     * Initializes the field with the supplied <code>long</code> value.
+     * @param value the numeric value
+     * @return this instance, because of this you can use it the following way:
+     * <code>document.add(new NumericField(name, precisionStep).setLongValue(value))</code>
+     */
+    public NumericField setLongValue(final long value) {
+        if (numericTS != null) numericTS.setLongValue(value);
+        fieldsData = Long.valueOf(value);
+        type = DataType.LONG;
+        return this;
+    }
+
+    /**
+     * Initializes the field with the supplied <code>int</code> value.
+     * @param value the numeric value
+     * @return this instance, because of this you can use it the following way:
+     * <code>document.add(new NumericField(name, precisionStep).setIntValue(value))</code>
+     */
+    public NumericField setIntValue(final int value) {
+        if (numericTS != null) numericTS.setIntValue(value);
+        fieldsData = Integer.valueOf(value);
+        type = DataType.INT;
+        return this;
+    }
+
+    /**
+     * Initializes the field with the supplied <code>double</code> value.
+     * @param value the numeric value
+     * @return this instance, because of this you can use it the following way:
+     * <code>document.add(new NumericField(name, precisionStep).setDoubleValue(value))</code>
+     */
+    public NumericField setDoubleValue(final double value) {
+        if (numericTS != null) numericTS.setDoubleValue(value);
+        fieldsData = Double.valueOf(value);
+        type = DataType.DOUBLE;
+        return this;
+    }
+
+    /**
+     * Initializes the field with the supplied <code>float</code> value.
+     * @param value the numeric value
+     * @return this instance, because of this you can use it the following way:
+     * <code>document.add(new NumericField(name, precisionStep).setFloatValue(value))</code>
+     */
+    public NumericField setFloatValue(final float value) {
+        if (numericTS != null) numericTS.setFloatValue(value);
+        fieldsData = Float.valueOf(value);
+        type = DataType.FLOAT;
+        return this;
+    }
 
 }

@@ -7,9 +7,9 @@ package org.apache.lucene.store;
  * The ASF licenses this file to You under the Apache License, Version 2.0
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -33,59 +33,59 @@ import java.util.HashSet;
 
 public class SingleInstanceLockFactory extends LockFactory {
 
-  private HashSet<String> locks = new HashSet<String>();
+    private HashSet<String> locks = new HashSet<String>();
 
-  @Override
-  public Lock makeLock(String lockName) {
-    // We do not use the LockPrefix at all, because the private
-    // HashSet instance effectively scopes the locking to this
-    // single Directory instance.
-    return new SingleInstanceLock(locks, lockName);
-  }
-
-  @Override
-  public void clearLock(String lockName) throws IOException {
-    synchronized(locks) {
-      if (locks.contains(lockName)) {
-        locks.remove(lockName);
-      }
+    @Override
+    public Lock makeLock(String lockName) {
+        // We do not use the LockPrefix at all, because the private
+        // HashSet instance effectively scopes the locking to this
+        // single Directory instance.
+        return new SingleInstanceLock(locks, lockName);
     }
-  }
+
+    @Override
+    public void clearLock(String lockName) throws IOException {
+        synchronized (locks) {
+            if (locks.contains(lockName)) {
+                locks.remove(lockName);
+            }
+        }
+    }
 }
 
 class SingleInstanceLock extends Lock {
 
-  String lockName;
-  private HashSet<String> locks;
+    String lockName;
+    private HashSet<String> locks;
 
-  public SingleInstanceLock(HashSet<String> locks, String lockName) {
-    this.locks = locks;
-    this.lockName = lockName;
-  }
-
-  @Override
-  public boolean obtain() throws IOException {
-    synchronized(locks) {
-      return locks.add(lockName);
+    public SingleInstanceLock(HashSet<String> locks, String lockName) {
+        this.locks = locks;
+        this.lockName = lockName;
     }
-  }
 
-  @Override
-  public void release() {
-    synchronized(locks) {
-      locks.remove(lockName);
+    @Override
+    public boolean obtain() throws IOException {
+        synchronized (locks) {
+            return locks.add(lockName);
+        }
     }
-  }
 
-  @Override
-  public boolean isLocked() {
-    synchronized(locks) {
-      return locks.contains(lockName);
+    @Override
+    public void release() {
+        synchronized (locks) {
+            locks.remove(lockName);
+        }
     }
-  }
 
-  @Override
-  public String toString() {
-    return super.toString() + ": " + lockName;
-  }
+    @Override
+    public boolean isLocked() {
+        synchronized (locks) {
+            return locks.contains(lockName);
+        }
+    }
+
+    @Override
+    public String toString() {
+        return super.toString() + ": " + lockName;
+    }
 }

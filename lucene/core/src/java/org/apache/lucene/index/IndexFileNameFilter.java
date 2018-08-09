@@ -7,9 +7,9 @@ package org.apache.lucene.index;
  * The ASF licenses this file to You under the Apache License, Version 2.0
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -28,67 +28,67 @@ import java.util.HashSet;
  */
 public class IndexFileNameFilter implements FilenameFilter {
 
-  private static IndexFileNameFilter singleton = new IndexFileNameFilter();
-  private HashSet<String> extensions;
-  private HashSet<String> extensionsInCFS;
+    private static IndexFileNameFilter singleton = new IndexFileNameFilter();
+    private HashSet<String> extensions;
+    private HashSet<String> extensionsInCFS;
 
-  // Prevent instantiation.
-  private IndexFileNameFilter() {
-    extensions = new HashSet<String>();
-    for (String ext : IndexFileNames.INDEX_EXTENSIONS) {
-      extensions.add(ext);
+    // Prevent instantiation.
+    private IndexFileNameFilter() {
+        extensions = new HashSet<String>();
+        for (String ext : IndexFileNames.INDEX_EXTENSIONS) {
+            extensions.add(ext);
+        }
+        extensionsInCFS = new HashSet<String>();
+        for (String ext : IndexFileNames.INDEX_EXTENSIONS_IN_COMPOUND_FILE) {
+            extensionsInCFS.add(ext);
+        }
     }
-    extensionsInCFS = new HashSet<String>();
-    for (String ext : IndexFileNames.INDEX_EXTENSIONS_IN_COMPOUND_FILE) {
-      extensionsInCFS.add(ext);
-    }
-  }
 
-  /* (non-Javadoc)
-   * @see java.io.FilenameFilter#accept(java.io.File, java.lang.String)
-   */
-  public boolean accept(File dir, String name) {
-    int i = name.lastIndexOf('.');
-    if (i != -1) {
-      String extension = name.substring(1+i);
-      if (extensions.contains(extension)) {
-        return true;
-      } else if (extension.startsWith("f") &&
-                 extension.matches("f\\d+")) {
-        return true;
-      } else if (extension.startsWith("s") &&
-                 extension.matches("s\\d+")) {
-        return true;
-      }
-    } else {
-      if (name.equals(IndexFileNames.DELETABLE)) return true;
-      else if (name.startsWith(IndexFileNames.SEGMENTS)) return true;
+    /* (non-Javadoc)
+     * @see java.io.FilenameFilter#accept(java.io.File, java.lang.String)
+     */
+    public boolean accept(File dir, String name) {
+        int i = name.lastIndexOf('.');
+        if (i != -1) {
+            String extension = name.substring(1 + i);
+            if (extensions.contains(extension)) {
+                return true;
+            } else if (extension.startsWith("f") &&
+                    extension.matches("f\\d+")) {
+                return true;
+            } else if (extension.startsWith("s") &&
+                    extension.matches("s\\d+")) {
+                return true;
+            }
+        } else {
+            if (name.equals(IndexFileNames.DELETABLE)) return true;
+            else if (name.startsWith(IndexFileNames.SEGMENTS)) return true;
+        }
+        return false;
     }
-    return false;
-  }
 
-  /**
-   * Returns true if this is a file that would be contained
-   * in a CFS file.  This function should only be called on
-   * files that pass the above "accept" (ie, are already
-   * known to be a Lucene index file).
-   */
-  public boolean isCFSFile(String name) {
-    int i = name.lastIndexOf('.');
-    if (i != -1) {
-      String extension = name.substring(1+i);
-      if (extensionsInCFS.contains(extension)) {
-        return true;
-      }
-      if (extension.startsWith("f") &&
-          extension.matches("f\\d+")) {
-        return true;
-      }
+    /**
+     * Returns true if this is a file that would be contained
+     * in a CFS file.  This function should only be called on
+     * files that pass the above "accept" (ie, are already
+     * known to be a Lucene index file).
+     */
+    public boolean isCFSFile(String name) {
+        int i = name.lastIndexOf('.');
+        if (i != -1) {
+            String extension = name.substring(1 + i);
+            if (extensionsInCFS.contains(extension)) {
+                return true;
+            }
+            if (extension.startsWith("f") &&
+                    extension.matches("f\\d+")) {
+                return true;
+            }
+        }
+        return false;
     }
-    return false;
-  }
 
-  public static IndexFileNameFilter getFilter() {
-    return singleton;
-  }
+    public static IndexFileNameFilter getFilter() {
+        return singleton;
+    }
 }

@@ -7,9 +7,9 @@ package org.apache.lucene.analysis.tokenattributes;
  * The ASF licenses this file to You under the Apache License, Version 2.0
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,9 +17,9 @@ package org.apache.lucene.analysis.tokenattributes;
  * limitations under the License.
  */
 
-import java.io.Serializable;
-
 import org.apache.lucene.util.AttributeImpl;
+
+import java.io.Serializable;
 
 /**
  * This attribute can be used to pass different flags down the tokenizer chain,
@@ -27,54 +27,54 @@ import org.apache.lucene.util.AttributeImpl;
  * @lucene.experimental While we think this is here to stay, we may want to change it to be a long.
  */
 public class FlagsAttributeImpl extends AttributeImpl implements FlagsAttribute, Cloneable, Serializable {
-  private int flags = 0;
-  
-  /**
-   * <p/>
-   *
-   * Get the bitset for any bits that have been set.  This is completely distinct from {@link TypeAttribute#type()}, although they do share similar purposes.
-   * The flags can be used to encode information about the token for use by other {@link org.apache.lucene.analysis.TokenFilter}s.
-   *
-   *
-   * @return The bits
-   */
-  public int getFlags() {
-    return flags;
-  }
+    private int flags = 0;
 
-  /**
-   * @see #getFlags()
-   */
-  public void setFlags(int flags) {
-    this.flags = flags;
-  }
-  
-  @Override
-  public void clear() {
-    flags = 0;
-  }
-
-  @Override
-  public boolean equals(Object other) {
-    if (this == other) {
-      return true;
+    /**
+     * <p/>
+     *
+     * Get the bitset for any bits that have been set.  This is completely distinct from {@link TypeAttribute#type()}, although they do share similar purposes.
+     * The flags can be used to encode information about the token for use by other {@link org.apache.lucene.analysis.TokenFilter}s.
+     *
+     *
+     * @return The bits
+     */
+    public int getFlags() {
+        return flags;
     }
-    
-    if (other instanceof FlagsAttributeImpl) {
-      return ((FlagsAttributeImpl) other).flags == flags;
-    }
-    
-    return false;
-  }
 
-  @Override
-  public int hashCode() {
-    return flags;
-  }
-  
-  @Override
-  public void copyTo(AttributeImpl target) {
-    FlagsAttribute t = (FlagsAttribute) target;
-    t.setFlags(flags);
-  }
+    /**
+     * @see #getFlags()
+     */
+    public void setFlags(int flags) {
+        this.flags = flags;
+    }
+
+    @Override
+    public void clear() {
+        flags = 0;
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (this == other) {
+            return true;
+        }
+
+        if (other instanceof FlagsAttributeImpl) {
+            return ((FlagsAttributeImpl) other).flags == flags;
+        }
+
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return flags;
+    }
+
+    @Override
+    public void copyTo(AttributeImpl target) {
+        FlagsAttribute t = (FlagsAttribute) target;
+        t.setFlags(flags);
+    }
 }

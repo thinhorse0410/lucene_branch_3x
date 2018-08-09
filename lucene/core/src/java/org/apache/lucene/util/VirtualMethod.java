@@ -7,9 +7,9 @@ package org.apache.lucene.util;
  * The ASF licenses this file to You under the Apache License, Version 2.0
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -58,92 +58,91 @@ import java.util.Set;
  */
 public final class VirtualMethod<C> {
 
-  private static final Set<Method> singletonSet = Collections.synchronizedSet(new HashSet<Method>());
+    private static final Set<Method> singletonSet = Collections.synchronizedSet(new HashSet<Method>());
 
-  private final Class<C> baseClass;
-  private final String method;
-  private final Class<?>[] parameters;
-  private final WeakIdentityMap<Class<? extends C>, Integer> cache = WeakIdentityMap.newConcurrentHashMap();
+    private final Class<C> baseClass;
+    private final String method;
+    private final Class<?>[] parameters;
+    private final WeakIdentityMap<Class<? extends C>, Integer> cache = WeakIdentityMap.newConcurrentHashMap();
 
-  /**
-   * Creates a new instance for the given {@code baseClass} and method declaration.
-   * @throws UnsupportedOperationException if you create a second instance of the same
-   *  {@code baseClass} and method declaration combination. This enforces the singleton status.
-   * @throws IllegalArgumentException if {@code baseClass} does not declare the given method.
-   */
-  public VirtualMethod(Class<C> baseClass, String method, Class<?>... parameters) {
-    this.baseClass = baseClass;
-    this.method = method;
-    this.parameters = parameters;
-    try {
-      if (!singletonSet.add(baseClass.getDeclaredMethod(method, parameters)))
-        throw new UnsupportedOperationException(
-          "VirtualMethod instances must be singletons and therefore " +
-          "assigned to static final members in the same class, they use as baseClass ctor param."
-        );
-    } catch (NoSuchMethodException nsme) {
-      throw new IllegalArgumentException(baseClass.getName() + " has no such method: "+nsme.getMessage());
-    }
-  }
-  
-  /**
-   * Returns the distance from the {@code baseClass} in which this method is overridden/implemented
-   * in the inheritance path between {@code baseClass} and the given subclass {@code subclazz}.
-   * @return 0 iff not overridden, else the distance to the base class
-   */
-  public int getImplementationDistance(final Class<? extends C> subclazz) {
-    Integer distance = cache.get(subclazz);
-    if (distance == null) {
-      // we have the slight chance that another thread may do the same, but who cares?
-      cache.put(subclazz, distance = Integer.valueOf(reflectImplementationDistance(subclazz)));
-    }
-    return distance.intValue();
-  }
-  
-  /**
-   * Returns, if this method is overridden/implemented in the inheritance path between
-   * {@code baseClass} and the given subclass {@code subclazz}.
-   * <p>You can use this method to detect if a method that should normally be final was overridden
-   * by the given instance's class.
-   * @return {@code false} iff not overridden
-   */
-  public boolean isOverriddenAsOf(final Class<? extends C> subclazz) {
-    return getImplementationDistance(subclazz) > 0;
-  }
-  
-  private int reflectImplementationDistance(final Class<? extends C> subclazz) {
-    if (!baseClass.isAssignableFrom(subclazz))
-      throw new IllegalArgumentException(subclazz.getName() + " is not a subclass of " + baseClass.getName());
-    boolean overridden = false;
-    int distance = 0;
-    for (Class<?> clazz = subclazz; clazz != baseClass && clazz != null; clazz = clazz.getSuperclass()) {
-      // lookup method, if success mark as overridden
-      if (!overridden) {
+    /**
+     * Creates a new instance for the given {@code baseClass} and method declaration.
+     * @throws UnsupportedOperationException if you create a second instance of the same
+     *  {@code baseClass} and method declaration combination. This enforces the singleton status.
+     * @throws IllegalArgumentException if {@code baseClass} does not declare the given method.
+     */
+    public VirtualMethod(Class<C> baseClass, String method, Class<?>... parameters) {
+        this.baseClass = baseClass;
+        this.method = method;
+        this.parameters = parameters;
         try {
-          clazz.getDeclaredMethod(method, parameters);
-          overridden = true;
+            if (!singletonSet.add(baseClass.getDeclaredMethod(method, parameters)))
+                throw new UnsupportedOperationException(
+                        "VirtualMethod instances must be singletons and therefore " +
+                                "assigned to static final members in the same class, they use as baseClass ctor param."
+                );
         } catch (NoSuchMethodException nsme) {
+            throw new IllegalArgumentException(baseClass.getName() + " has no such method: " + nsme.getMessage());
         }
-      }
-      
-      // increment distance if overridden
-      if (overridden) distance++;
     }
-    return distance;
-  }
-  
-  /**
-   * Utility method that compares the implementation/override distance of two methods.
-   * @return <ul>
-   *  <li>&gt; 1, iff {@code m1} is overridden/implemented in a subclass of the class overriding/declaring {@code m2}
-   *  <li>&lt; 1, iff {@code m2} is overridden in a subclass of the class overriding/declaring {@code m1}
-   *  <li>0, iff both methods are overridden in the same class (or are not overridden at all)
-   * </ul>
-   */
-  public static <C> int compareImplementationDistance(final Class<? extends C> clazz,
-    final VirtualMethod<C> m1, final VirtualMethod<C> m2)
-  {
-    return Integer.valueOf(m1.getImplementationDistance(clazz)).compareTo(m2.getImplementationDistance(clazz));
-  }
-  
+
+    /**
+     * Returns the distance from the {@code baseClass} in which this method is overridden/implemented
+     * in the inheritance path between {@code baseClass} and the given subclass {@code subclazz}.
+     * @return 0 iff not overridden, else the distance to the base class
+     */
+    public int getImplementationDistance(final Class<? extends C> subclazz) {
+        Integer distance = cache.get(subclazz);
+        if (distance == null) {
+            // we have the slight chance that another thread may do the same, but who cares?
+            cache.put(subclazz, distance = Integer.valueOf(reflectImplementationDistance(subclazz)));
+        }
+        return distance.intValue();
+    }
+
+    /**
+     * Returns, if this method is overridden/implemented in the inheritance path between
+     * {@code baseClass} and the given subclass {@code subclazz}.
+     * <p>You can use this method to detect if a method that should normally be final was overridden
+     * by the given instance's class.
+     * @return {@code false} iff not overridden
+     */
+    public boolean isOverriddenAsOf(final Class<? extends C> subclazz) {
+        return getImplementationDistance(subclazz) > 0;
+    }
+
+    private int reflectImplementationDistance(final Class<? extends C> subclazz) {
+        if (!baseClass.isAssignableFrom(subclazz))
+            throw new IllegalArgumentException(subclazz.getName() + " is not a subclass of " + baseClass.getName());
+        boolean overridden = false;
+        int distance = 0;
+        for (Class<?> clazz = subclazz; clazz != baseClass && clazz != null; clazz = clazz.getSuperclass()) {
+            // lookup method, if success mark as overridden
+            if (!overridden) {
+                try {
+                    clazz.getDeclaredMethod(method, parameters);
+                    overridden = true;
+                } catch (NoSuchMethodException nsme) {
+                }
+            }
+
+            // increment distance if overridden
+            if (overridden) distance++;
+        }
+        return distance;
+    }
+
+    /**
+     * Utility method that compares the implementation/override distance of two methods.
+     * @return <ul>
+     *  <li>&gt; 1, iff {@code m1} is overridden/implemented in a subclass of the class overriding/declaring {@code m2}
+     *  <li>&lt; 1, iff {@code m2} is overridden in a subclass of the class overriding/declaring {@code m1}
+     *  <li>0, iff both methods are overridden in the same class (or are not overridden at all)
+     * </ul>
+     */
+    public static <C> int compareImplementationDistance(final Class<? extends C> clazz,
+                                                        final VirtualMethod<C> m1, final VirtualMethod<C> m2) {
+        return Integer.valueOf(m1.getImplementationDistance(clazz)).compareTo(m2.getImplementationDistance(clazz));
+    }
+
 }

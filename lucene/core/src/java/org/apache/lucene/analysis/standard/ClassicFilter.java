@@ -7,9 +7,9 @@ package org.apache.lucene.analysis.standard;
  * The ASF licenses this file to You under the Apache License, Version 2.0
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -26,48 +26,48 @@ import org.apache.lucene.analysis.tokenattributes.TypeAttribute;
 
 public class ClassicFilter extends TokenFilter {
 
-  /** Construct filtering <i>in</i>. */
-  public ClassicFilter(TokenStream in) {
-    super(in);
-  }
-
-  private static final String APOSTROPHE_TYPE = ClassicTokenizer.TOKEN_TYPES[ClassicTokenizer.APOSTROPHE];
-  private static final String ACRONYM_TYPE = ClassicTokenizer.TOKEN_TYPES[ClassicTokenizer.ACRONYM];
-
-  // this filters uses attribute type
-  private final TypeAttribute typeAtt = addAttribute(TypeAttribute.class);
-  private final CharTermAttribute termAtt = addAttribute(CharTermAttribute.class);
-  
-  /** Returns the next token in the stream, or null at EOS.
-   * <p>Removes <tt>'s</tt> from the end of words.
-   * <p>Removes dots from acronyms.
-   */
-  @Override
-  public final boolean incrementToken() throws java.io.IOException {
-    if (!input.incrementToken()) {
-      return false;
+    /** Construct filtering <i>in</i>. */
+    public ClassicFilter(TokenStream in) {
+        super(in);
     }
 
-    final char[] buffer = termAtt.buffer();
-    final int bufferLength = termAtt.length();
-    final String type = typeAtt.type();
+    private static final String APOSTROPHE_TYPE = ClassicTokenizer.TOKEN_TYPES[ClassicTokenizer.APOSTROPHE];
+    private static final String ACRONYM_TYPE = ClassicTokenizer.TOKEN_TYPES[ClassicTokenizer.ACRONYM];
 
-    if (type == APOSTROPHE_TYPE &&      // remove 's
-        bufferLength >= 2 &&
-        buffer[bufferLength-2] == '\'' &&
-        (buffer[bufferLength-1] == 's' || buffer[bufferLength-1] == 'S')) {
-      // Strip last 2 characters off
-      termAtt.setLength(bufferLength - 2);
-    } else if (type == ACRONYM_TYPE) {      // remove dots
-      int upto = 0;
-      for(int i=0;i<bufferLength;i++) {
-        char c = buffer[i];
-        if (c != '.')
-          buffer[upto++] = c;
-      }
-      termAtt.setLength(upto);
+    // this filters uses attribute type
+    private final TypeAttribute typeAtt = addAttribute(TypeAttribute.class);
+    private final CharTermAttribute termAtt = addAttribute(CharTermAttribute.class);
+
+    /** Returns the next token in the stream, or null at EOS.
+     * <p>Removes <tt>'s</tt> from the end of words.
+     * <p>Removes dots from acronyms.
+     */
+    @Override
+    public final boolean incrementToken() throws java.io.IOException {
+        if (!input.incrementToken()) {
+            return false;
+        }
+
+        final char[] buffer = termAtt.buffer();
+        final int bufferLength = termAtt.length();
+        final String type = typeAtt.type();
+
+        if (type == APOSTROPHE_TYPE &&      // remove 's
+                bufferLength >= 2 &&
+                buffer[bufferLength - 2] == '\'' &&
+                (buffer[bufferLength - 1] == 's' || buffer[bufferLength - 1] == 'S')) {
+            // Strip last 2 characters off
+            termAtt.setLength(bufferLength - 2);
+        } else if (type == ACRONYM_TYPE) {      // remove dots
+            int upto = 0;
+            for (int i = 0; i < bufferLength; i++) {
+                char c = buffer[i];
+                if (c != '.')
+                    buffer[upto++] = c;
+            }
+            termAtt.setLength(upto);
+        }
+
+        return true;
     }
-
-    return true;
-  }
 }

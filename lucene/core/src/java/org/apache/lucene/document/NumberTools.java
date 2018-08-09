@@ -7,9 +7,9 @@ package org.apache.lucene.document;
  * The ASF licenses this file to You under the Apache License, Version 2.0
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,25 +17,24 @@ package org.apache.lucene.document;
  * limitations under the License.
  */
 
-import org.apache.lucene.document.NumericField; // for javadocs
-import org.apache.lucene.search.NumericRangeQuery; // for javadocs
-import org.apache.lucene.util.NumericUtils; // for javadocs
+import org.apache.lucene.search.NumericRangeQuery;
+import org.apache.lucene.util.NumericUtils;
 
 // do not remove this class in 3.0, it may be needed to decode old indexes!
 
 /**
  * Provides support for converting longs to Strings, and back again. The strings
  * are structured so that lexicographic sorting order is preserved.
- * 
+ *
  * <p>
  * That is, if l1 is less than l2 for any two longs l1 and l2, then
  * NumberTools.longToString(l1) is lexicographically less than
  * NumberTools.longToString(l2). (Similarly for "greater than" and "equals".)
- * 
+ *
  * <p>
  * This class handles <b>all</b> long values (unlike
  * {@link org.apache.lucene.document.DateField}).
- * 
+ *
  * @deprecated For new indexes use {@link NumericUtils} instead, which
  * provides a sortable binary representation (prefix encoded) of numeric
  * values.
@@ -104,7 +103,7 @@ public class NumberTools {
     /**
      * Converts a String that was returned by {@link #longToString} back to a
      * long.
-     * 
+     *
      * @throws IllegalArgumentException
      *             if the input is null
      * @throws NumberFormatException

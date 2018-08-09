@@ -7,9 +7,9 @@ package org.apache.lucene.util;
  * The ASF licenses this file to You under the Apache License, Version 2.0
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -30,119 +30,119 @@ import java.io.Reader;
 
 public final class RollingCharBuffer {
 
-  private Reader reader;
+    private Reader reader;
 
-  private char[] buffer = new char[32];
+    private char[] buffer = new char[32];
 
-  // Next array index to write to in buffer:
-  private int nextWrite;
+    // Next array index to write to in buffer:
+    private int nextWrite;
 
-  // Next absolute position to read from reader:
-  private int nextPos;
+    // Next absolute position to read from reader:
+    private int nextPos;
 
-  // How many valid chars (wrapped) are in the buffer:
-  private int count;
+    // How many valid chars (wrapped) are in the buffer:
+    private int count;
 
-  // True if we hit EOF
-  private boolean end;
-    
-  /** Clear array and switch to new reader. */
-  public void reset(Reader reader) {
-    this.reader = reader;
-    nextPos = 0;
-    nextWrite = 0;
-    count = 0;
-    end = false;
-  }
+    // True if we hit EOF
+    private boolean end;
 
-  /* Absolute position read.  NOTE: pos must not jump
-   * ahead by more than 1!  Ie, it's OK to read arbitarily
-   * far back (just not prior to the last {@link
-   * #freeBefore}), but NOT ok to read arbitrarily far
-   * ahead.  Returns -1 if you hit EOF. */
-  public int get(int pos) throws IOException {
-    //System.out.println("    get pos=" + pos + " nextPos=" + nextPos + " count=" + count);
-    if (pos == nextPos) {
-      if (end) {
-        return -1;
-      }
-      final int ch = reader.read();
-      if (ch == -1) {
-        end = true;
-        return -1;
-      }
-      if (count == buffer.length) {
-        // Grow
-        final char[] newBuffer = new char[ArrayUtil.oversize(1+count, RamUsageEstimator.NUM_BYTES_CHAR)];
-        //System.out.println(Thread.currentThread().getName() + ": cb grow " + newBuffer.length);
-        System.arraycopy(buffer, nextWrite, newBuffer, 0, buffer.length - nextWrite);
-        System.arraycopy(buffer, 0, newBuffer, buffer.length - nextWrite, nextWrite);
-        nextWrite = buffer.length;
-        buffer = newBuffer;
-      }
-      if (nextWrite == buffer.length) {
+    /** Clear array and switch to new reader. */
+    public void reset(Reader reader) {
+        this.reader = reader;
+        nextPos = 0;
         nextWrite = 0;
-      }
-      buffer[nextWrite++] = (char) ch;
-      count++;
-      nextPos++;
-      return ch;
-    } else {
-      // Cannot read from future (except by 1):
-      assert pos < nextPos;
-
-      // Cannot read from already freed past:
-      assert nextPos - pos <= count: "nextPos=" + nextPos + " pos=" + pos + " count=" + count;
-
-      final int index = getIndex(pos);
-      return buffer[index];
+        count = 0;
+        end = false;
     }
-  }
 
-  // For assert:
-  private boolean inBounds(int pos) {
-    return pos >= 0 && pos < nextPos && pos >= nextPos - count;
-  }
+    /* Absolute position read.  NOTE: pos must not jump
+     * ahead by more than 1!  Ie, it's OK to read arbitarily
+     * far back (just not prior to the last {@link
+     * #freeBefore}), but NOT ok to read arbitrarily far
+     * ahead.  Returns -1 if you hit EOF. */
+    public int get(int pos) throws IOException {
+        //System.out.println("    get pos=" + pos + " nextPos=" + nextPos + " count=" + count);
+        if (pos == nextPos) {
+            if (end) {
+                return -1;
+            }
+            final int ch = reader.read();
+            if (ch == -1) {
+                end = true;
+                return -1;
+            }
+            if (count == buffer.length) {
+                // Grow
+                final char[] newBuffer = new char[ArrayUtil.oversize(1 + count, RamUsageEstimator.NUM_BYTES_CHAR)];
+                //System.out.println(Thread.currentThread().getName() + ": cb grow " + newBuffer.length);
+                System.arraycopy(buffer, nextWrite, newBuffer, 0, buffer.length - nextWrite);
+                System.arraycopy(buffer, 0, newBuffer, buffer.length - nextWrite, nextWrite);
+                nextWrite = buffer.length;
+                buffer = newBuffer;
+            }
+            if (nextWrite == buffer.length) {
+                nextWrite = 0;
+            }
+            buffer[nextWrite++] = (char) ch;
+            count++;
+            nextPos++;
+            return ch;
+        } else {
+            // Cannot read from future (except by 1):
+            assert pos < nextPos;
 
-  private int getIndex(int pos) {
-    int index = nextWrite - (nextPos - pos);
-    if (index < 0) {
-      // Wrap:
-      index += buffer.length;
-      assert index >= 0;
+            // Cannot read from already freed past:
+            assert nextPos - pos <= count : "nextPos=" + nextPos + " pos=" + pos + " count=" + count;
+
+            final int index = getIndex(pos);
+            return buffer[index];
+        }
     }
-    return index;
-  }
 
-  public char[] get(int posStart, int length) {
-    assert length > 0;
-    assert inBounds(posStart): "posStart=" + posStart + " length=" + length;
-    //System.out.println("    buffer.get posStart=" + posStart + " len=" + length);
-      
-    final int startIndex = getIndex(posStart);
-    final int endIndex = getIndex(posStart + length);
-    //System.out.println("      startIndex=" + startIndex + " endIndex=" + endIndex);
-
-    final char[] result = new char[length];
-    if (endIndex >= startIndex && length < buffer.length) {
-      System.arraycopy(buffer, startIndex, result, 0, endIndex-startIndex);
-    } else {
-      // Wrapped:
-      final int part1 = buffer.length-startIndex;
-      System.arraycopy(buffer, startIndex, result, 0, part1);
-      System.arraycopy(buffer, 0, result, buffer.length-startIndex, length-part1);
+    // For assert:
+    private boolean inBounds(int pos) {
+        return pos >= 0 && pos < nextPos && pos >= nextPos - count;
     }
-    return result;
-  }
 
-  /** Call this to notify us that no chars before this
-   *  absolute position are needed anymore. */
-  public void freeBefore(int pos) {
-    assert pos >= 0;
-    assert pos <= nextPos;
-    final int newCount = nextPos - pos;
-    assert newCount <= count: "newCount=" + newCount + " count=" + count;
-    assert newCount <= buffer.length: "newCount=" + newCount + " buf.length=" + buffer.length;
-    count = newCount;
-  }
+    private int getIndex(int pos) {
+        int index = nextWrite - (nextPos - pos);
+        if (index < 0) {
+            // Wrap:
+            index += buffer.length;
+            assert index >= 0;
+        }
+        return index;
+    }
+
+    public char[] get(int posStart, int length) {
+        assert length > 0;
+        assert inBounds(posStart) : "posStart=" + posStart + " length=" + length;
+        //System.out.println("    buffer.get posStart=" + posStart + " len=" + length);
+
+        final int startIndex = getIndex(posStart);
+        final int endIndex = getIndex(posStart + length);
+        //System.out.println("      startIndex=" + startIndex + " endIndex=" + endIndex);
+
+        final char[] result = new char[length];
+        if (endIndex >= startIndex && length < buffer.length) {
+            System.arraycopy(buffer, startIndex, result, 0, endIndex - startIndex);
+        } else {
+            // Wrapped:
+            final int part1 = buffer.length - startIndex;
+            System.arraycopy(buffer, startIndex, result, 0, part1);
+            System.arraycopy(buffer, 0, result, buffer.length - startIndex, length - part1);
+        }
+        return result;
+    }
+
+    /** Call this to notify us that no chars before this
+     *  absolute position are needed anymore. */
+    public void freeBefore(int pos) {
+        assert pos >= 0;
+        assert pos <= nextPos;
+        final int newCount = nextPos - pos;
+        assert newCount <= count : "newCount=" + newCount + " count=" + count;
+        assert newCount <= buffer.length : "newCount=" + newCount + " buf.length=" + buffer.length;
+        count = newCount;
+    }
 }

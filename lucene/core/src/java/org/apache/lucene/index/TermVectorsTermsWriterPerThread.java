@@ -7,9 +7,9 @@ package org.apache.lucene.index;
  * The ASF licenses this file to You under the Apache License, Version 2.0
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -21,71 +21,72 @@ import org.apache.lucene.util.UnicodeUtil;
 
 final class TermVectorsTermsWriterPerThread extends TermsHashConsumerPerThread {
 
-  final TermVectorsTermsWriter termsWriter;
-  final TermsHashPerThread termsHashPerThread;
-  final DocumentsWriter.DocState docState;
+    final TermVectorsTermsWriter termsWriter;
+    final TermsHashPerThread termsHashPerThread;
+    final DocumentsWriter.DocState docState;
 
-  TermVectorsTermsWriter.PerDoc doc;
+    TermVectorsTermsWriter.PerDoc doc;
 
-  public TermVectorsTermsWriterPerThread(TermsHashPerThread termsHashPerThread, TermVectorsTermsWriter termsWriter) {
-    this.termsWriter = termsWriter;
-    this.termsHashPerThread = termsHashPerThread;
-    docState = termsHashPerThread.docState;
-  }
-  
-  // Used by perField when serializing the term vectors
-  final ByteSliceReader vectorSliceReader = new ByteSliceReader();
-
-  final UnicodeUtil.UTF8Result utf8Results[] = {new UnicodeUtil.UTF8Result(),
-                                                new UnicodeUtil.UTF8Result()};
-
-  @Override
-  public void startDocument() {
-    assert clearLastVectorFieldName();
-    if (doc != null) {
-      doc.reset();
-      doc.docID = docState.docID;
+    public TermVectorsTermsWriterPerThread(TermsHashPerThread termsHashPerThread, TermVectorsTermsWriter termsWriter) {
+        this.termsWriter = termsWriter;
+        this.termsHashPerThread = termsHashPerThread;
+        docState = termsHashPerThread.docState;
     }
-  }
 
-  @Override
-  public DocumentsWriter.DocWriter finishDocument() {
-    try {
-      return doc;
-    } finally {
-      doc = null;
+    // Used by perField when serializing the term vectors
+    final ByteSliceReader vectorSliceReader = new ByteSliceReader();
+
+    final UnicodeUtil.UTF8Result utf8Results[] = {new UnicodeUtil.UTF8Result(),
+            new UnicodeUtil.UTF8Result()};
+
+    @Override
+    public void startDocument() {
+        assert clearLastVectorFieldName();
+        if (doc != null) {
+            doc.reset();
+            doc.docID = docState.docID;
+        }
     }
-  }
 
-  @Override
-  public TermsHashConsumerPerField addField(TermsHashPerField termsHashPerField, FieldInfo fieldInfo) {
-    return new TermVectorsTermsWriterPerField(termsHashPerField, this, fieldInfo);
-  }
-
-  @Override
-  public void abort() {
-    if (doc != null) {
-      doc.abort();
-      doc = null;
+    @Override
+    public DocumentsWriter.DocWriter finishDocument() {
+        try {
+            return doc;
+        } finally {
+            doc = null;
+        }
     }
-  }
 
-  // Called only by assert
-  final boolean clearLastVectorFieldName() {
-    lastVectorFieldName = null;
-    return true;
-  }
+    @Override
+    public TermsHashConsumerPerField addField(TermsHashPerField termsHashPerField, FieldInfo fieldInfo) {
+        return new TermVectorsTermsWriterPerField(termsHashPerField, this, fieldInfo);
+    }
 
-  // Called only by assert
-  String lastVectorFieldName;
-  final boolean vectorFieldsInOrder(FieldInfo fi) {
-    try {
-      if (lastVectorFieldName != null)
-        return lastVectorFieldName.compareTo(fi.name) < 0;
-      else
+    @Override
+    public void abort() {
+        if (doc != null) {
+            doc.abort();
+            doc = null;
+        }
+    }
+
+    // Called only by assert
+    final boolean clearLastVectorFieldName() {
+        lastVectorFieldName = null;
         return true;
-    } finally {
-      lastVectorFieldName = fi.name;
     }
-  }
+
+    // Called only by assert
+    String lastVectorFieldName;
+
+    final boolean vectorFieldsInOrder(FieldInfo fi) {
+        try {
+            if (lastVectorFieldName != null)
+                return lastVectorFieldName.compareTo(fi.name) < 0;
+            else
+                return true;
+        } finally {
+            lastVectorFieldName = fi.name;
+        }
+    }
 }

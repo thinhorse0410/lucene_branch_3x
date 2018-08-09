@@ -7,9 +7,9 @@ package org.apache.lucene.store;
  * The ASF licenses this file to You under the Apache License, Version 2.0
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,80 +17,81 @@ package org.apache.lucene.store;
  * limitations under the License.
  */
 
-import java.util.ArrayList;
 import java.io.Serializable;
+import java.util.ArrayList;
 
 /** @lucene.internal */
 public class RAMFile implements Serializable {
 
-  private static final long serialVersionUID = 1l;
+    private static final long serialVersionUID = 1l;
 
-  protected ArrayList<byte[]> buffers = new ArrayList<byte[]>();
-  long length;
-  RAMDirectory directory;
-  protected long sizeInBytes;
+    protected ArrayList<byte[]> buffers = new ArrayList<byte[]>();
+    long length;
+    RAMDirectory directory;
+    protected long sizeInBytes;
 
-  // This is publicly modifiable via Directory.touchFile(), so direct access not supported
-  private long lastModified = System.currentTimeMillis();
+    // This is publicly modifiable via Directory.touchFile(), so direct access not supported
+    private long lastModified = System.currentTimeMillis();
 
-  // File used as buffer, in no RAMDirectory
-  public RAMFile() {}
-  
-  RAMFile(RAMDirectory directory) {
-    this.directory = directory;
-  }
-
-  // For non-stream access from thread that might be concurrent with writing
-  public synchronized long getLength() {
-    return length;
-  }
-
-  protected synchronized void setLength(long length) {
-    this.length = length;
-  }
-
-  // For non-stream access from thread that might be concurrent with writing
-  public synchronized long getLastModified() {
-    return lastModified;
-  }
-
-  protected synchronized void setLastModified(long lastModified) {
-    this.lastModified = lastModified;
-  }
-
-  protected final byte[] addBuffer(int size) {
-    byte[] buffer = newBuffer(size);
-    synchronized(this) {
-      buffers.add(buffer);
-      sizeInBytes += size;
+    // File used as buffer, in no RAMDirectory
+    public RAMFile() {
     }
 
-    if (directory != null) {
-      directory.sizeInBytes.getAndAdd(size);
+    RAMFile(RAMDirectory directory) {
+        this.directory = directory;
     }
-    return buffer;
-  }
 
-  protected final synchronized byte[] getBuffer(int index) {
-    return buffers.get(index);
-  }
+    // For non-stream access from thread that might be concurrent with writing
+    public synchronized long getLength() {
+        return length;
+    }
 
-  protected final synchronized int numBuffers() {
-    return buffers.size();
-  }
+    protected synchronized void setLength(long length) {
+        this.length = length;
+    }
 
-  /**
-   * Expert: allocate a new buffer. 
-   * Subclasses can allocate differently. 
-   * @param size size of allocated buffer.
-   * @return allocated buffer.
-   */
-  protected byte[] newBuffer(int size) {
-    return new byte[size];
-  }
+    // For non-stream access from thread that might be concurrent with writing
+    public synchronized long getLastModified() {
+        return lastModified;
+    }
 
-  public synchronized long getSizeInBytes() {
-    return sizeInBytes;
-  }
-  
+    protected synchronized void setLastModified(long lastModified) {
+        this.lastModified = lastModified;
+    }
+
+    protected final byte[] addBuffer(int size) {
+        byte[] buffer = newBuffer(size);
+        synchronized (this) {
+            buffers.add(buffer);
+            sizeInBytes += size;
+        }
+
+        if (directory != null) {
+            directory.sizeInBytes.getAndAdd(size);
+        }
+        return buffer;
+    }
+
+    protected final synchronized byte[] getBuffer(int index) {
+        return buffers.get(index);
+    }
+
+    protected final synchronized int numBuffers() {
+        return buffers.size();
+    }
+
+    /**
+     * Expert: allocate a new buffer.
+     * Subclasses can allocate differently.
+     * @param size size of allocated buffer.
+     * @return allocated buffer.
+     */
+    protected byte[] newBuffer(int size) {
+        return new byte[size];
+    }
+
+    public synchronized long getSizeInBytes() {
+        return sizeInBytes;
+    }
+
 }

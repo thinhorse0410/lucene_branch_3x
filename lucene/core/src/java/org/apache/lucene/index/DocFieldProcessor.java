@@ -7,9 +7,9 @@ package org.apache.lucene.index;
  * The ASF licenses this file to You under the Apache License, Version 2.0
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,8 +19,8 @@ package org.apache.lucene.index;
 
 import java.io.IOException;
 import java.util.Collection;
-import java.util.Map;
 import java.util.HashMap;
+import java.util.Map;
 
 
 /**
@@ -33,56 +33,56 @@ import java.util.HashMap;
 
 final class DocFieldProcessor extends DocConsumer {
 
-  final DocumentsWriter docWriter;
-  final FieldInfos fieldInfos;
-  final DocFieldConsumer consumer;
-  final StoredFieldsWriter fieldsWriter;
+    final DocumentsWriter docWriter;
+    final FieldInfos fieldInfos;
+    final DocFieldConsumer consumer;
+    final StoredFieldsWriter fieldsWriter;
 
-  public DocFieldProcessor(DocumentsWriter docWriter, DocFieldConsumer consumer) {
-    this.docWriter = docWriter;
-    this.consumer = consumer;
-    fieldInfos = docWriter.getFieldInfos();
-    consumer.setFieldInfos(fieldInfos);
-    fieldsWriter = new StoredFieldsWriter(docWriter, fieldInfos);
-  }
-
-  @Override
-  public void flush(Collection<DocConsumerPerThread> threads, SegmentWriteState state) throws IOException {
-
-    Map<DocFieldConsumerPerThread, Collection<DocFieldConsumerPerField>> childThreadsAndFields = new HashMap<DocFieldConsumerPerThread, Collection<DocFieldConsumerPerField>>();
-    for ( DocConsumerPerThread thread : threads) {
-      DocFieldProcessorPerThread perThread = (DocFieldProcessorPerThread) thread;
-      childThreadsAndFields.put(perThread.consumer, perThread.fields());
-      perThread.trimFields(state);
+    public DocFieldProcessor(DocumentsWriter docWriter, DocFieldConsumer consumer) {
+        this.docWriter = docWriter;
+        this.consumer = consumer;
+        fieldInfos = docWriter.getFieldInfos();
+        consumer.setFieldInfos(fieldInfos);
+        fieldsWriter = new StoredFieldsWriter(docWriter, fieldInfos);
     }
 
-    fieldsWriter.flush(state);
-    consumer.flush(childThreadsAndFields, state);
+    @Override
+    public void flush(Collection<DocConsumerPerThread> threads, SegmentWriteState state) throws IOException {
 
-    // Important to save after asking consumer to flush so
-    // consumer can alter the FieldInfo* if necessary.  EG,
-    // FreqProxTermsWriter does this with
-    // FieldInfo.storePayload.
-    final String fileName = IndexFileNames.segmentFileName(state.segmentName, IndexFileNames.FIELD_INFOS_EXTENSION);
-    fieldInfos.write(state.directory, fileName);
-  }
+        Map<DocFieldConsumerPerThread, Collection<DocFieldConsumerPerField>> childThreadsAndFields = new HashMap<DocFieldConsumerPerThread, Collection<DocFieldConsumerPerField>>();
+        for (DocConsumerPerThread thread : threads) {
+            DocFieldProcessorPerThread perThread = (DocFieldProcessorPerThread) thread;
+            childThreadsAndFields.put(perThread.consumer, perThread.fields());
+            perThread.trimFields(state);
+        }
 
-  @Override
-  public void abort() {
-    try {
-      fieldsWriter.abort();
-    } finally {
-      consumer.abort();
+        fieldsWriter.flush(state);
+        consumer.flush(childThreadsAndFields, state);
+
+        // Important to save after asking consumer to flush so
+        // consumer can alter the FieldInfo* if necessary.  EG,
+        // FreqProxTermsWriter does this with
+        // FieldInfo.storePayload.
+        final String fileName = IndexFileNames.segmentFileName(state.segmentName, IndexFileNames.FIELD_INFOS_EXTENSION);
+        fieldInfos.write(state.directory, fileName);
     }
-  }
 
-  @Override
-  public boolean freeRAM() {
-    return consumer.freeRAM();
-  }
+    @Override
+    public void abort() {
+        try {
+            fieldsWriter.abort();
+        } finally {
+            consumer.abort();
+        }
+    }
 
-  @Override
-  public DocConsumerPerThread addThread(DocumentsWriterThreadState threadState) throws IOException {
-    return new DocFieldProcessorPerThread(threadState, this);
-  }
+    @Override
+    public boolean freeRAM() {
+        return consumer.freeRAM();
+    }
+
+    @Override
+    public DocConsumerPerThread addThread(DocumentsWriterThreadState threadState) throws IOException {
+        return new DocFieldProcessorPerThread(threadState, this);
+    }
 }

@@ -7,9 +7,9 @@ package org.apache.lucene.index;
  * The ASF licenses this file to You under the Apache License, Version 2.0
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -29,25 +29,24 @@ import java.io.IOException;
  */
 
 public interface TermPositions
-    extends TermDocs
-{
+        extends TermDocs {
     /** Returns next position in the current document.  It is an error to call
-    this more than {@link #freq()} times
-    without calling {@link #next()}<p> This is
-    invalid until {@link #next()} is called for
-    the first time.
-    */
+     this more than {@link #freq()} times
+     without calling {@link #next()}<p> This is
+     invalid until {@link #next()} is called for
+     the first time.
+     */
     int nextPosition() throws IOException;
-    
-    /** 
+
+    /**
      * Returns the length of the payload at the current term position.
      * This is invalid until {@link #nextPosition()} is called for
      * the first time.<br>
      * @return length of the current payload in number of bytes
      */
     int getPayloadLength();
-    
-    /** 
+
+    /**
      * Returns the payload data at the current term position.
      * This is invalid until {@link #nextPosition()} is called for
      * the first time.
@@ -55,7 +54,7 @@ public interface TermPositions
      * of {@link #nextPosition()}. However, payloads are loaded lazily,
      * so if the payload data for the current position is not needed,
      * this method may not be called at all for performance reasons.<br>
-     * 
+     *
      * @param data the array into which the data of this payload is to be
      *             stored, if it is big enough; otherwise, a new byte[] array
      *             is allocated for this purpose. 
@@ -66,14 +65,14 @@ public interface TermPositions
      */
     byte[] getPayload(byte[] data, int offset) throws IOException;
 
-  /**
-   * Checks if a payload can be loaded at this position.
-   * <p>
-   * Payloads can only be loaded once per call to 
-   * {@link #nextPosition()}.
-   * 
-   * @return true if there is a payload available at this position that can be loaded
-   */
+    /**
+     * Checks if a payload can be loaded at this position.
+     * <p>
+     * Payloads can only be loaded once per call to
+     * {@link #nextPosition()}.
+     *
+     * @return true if there is a payload available at this position that can be loaded
+     */
     public boolean isPayloadAvailable();
 
 }

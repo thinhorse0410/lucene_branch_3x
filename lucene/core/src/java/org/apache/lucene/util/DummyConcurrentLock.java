@@ -7,9 +7,9 @@ package org.apache.lucene.util;
  * The ASF licenses this file to You under the Apache License, Version 2.0
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -18,8 +18,8 @@ package org.apache.lucene.util;
  */
 
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
@@ -28,25 +28,28 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public final class DummyConcurrentLock implements Lock {
 
-  /** a default instance, can be always used, as this {@link Lock} is stateless. */
-  public static final DummyConcurrentLock INSTANCE = new DummyConcurrentLock();
+    /** a default instance, can be always used, as this {@link Lock} is stateless. */
+    public static final DummyConcurrentLock INSTANCE = new DummyConcurrentLock();
 
-  public void lock() {}
-  
-  public void lockInterruptibly() {}
-  
-  public boolean tryLock() {
-    return true;
-  }
-  
-  public boolean tryLock(long time, TimeUnit unit) {
-    return true;
-  }
-  
-  public void unlock() {}
-  
-  public Condition newCondition() {
-    throw new UnsupportedOperationException();
-  }
+    public void lock() {
+    }
+
+    public void lockInterruptibly() {
+    }
+
+    public boolean tryLock() {
+        return true;
+    }
+
+    public boolean tryLock(long time, TimeUnit unit) {
+        return true;
+    }
+
+    public void unlock() {
+    }
+
+    public Condition newCondition() {
+        throw new UnsupportedOperationException();
+    }
 
 }

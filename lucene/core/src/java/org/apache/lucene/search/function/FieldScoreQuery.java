@@ -7,9 +7,9 @@ package org.apache.lucene.search.function;
  * The ASF licenses this file to You under the Apache License, Version 2.0
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -51,75 +51,77 @@ package org.apache.lucene.search.function;
  * To take advantage of this, it is extremely important to reuse index-readers or index-searchers, 
  * otherwise, for instance if for each query a new index reader is opened, large penalties would be 
  * paid for loading the field values into memory over and over again!
- * 
+ *
  * @lucene.experimental
  */
 public class FieldScoreQuery extends ValueSourceQuery {
 
-  /**
-   * Type of score field, indicating how field values are interpreted/parsed.  
-   * <p>
-   * The type selected at search search time should match the data stored in the field. 
-   * Different types have different RAM requirements: 
-   * <ul>
-   *   <li>{@link #BYTE} consumes 1 * maxDocs bytes.</li>
-   *   <li>{@link #SHORT} consumes 2 * maxDocs bytes.</li>
-   *   <li>{@link #INT} consumes 4 * maxDocs bytes.</li>
-   *   <li>{@link #FLOAT} consumes 8 * maxDocs bytes.</li>
-   * </ul>
-   */
-  public static class Type {
-    
-    /** field values are interpreted as numeric byte values. */
-    public static final Type BYTE = new Type("byte"); 
+    /**
+     * Type of score field, indicating how field values are interpreted/parsed.
+     * <p>
+     * The type selected at search search time should match the data stored in the field.
+     * Different types have different RAM requirements:
+     * <ul>
+     *   <li>{@link #BYTE} consumes 1 * maxDocs bytes.</li>
+     *   <li>{@link #SHORT} consumes 2 * maxDocs bytes.</li>
+     *   <li>{@link #INT} consumes 4 * maxDocs bytes.</li>
+     *   <li>{@link #FLOAT} consumes 8 * maxDocs bytes.</li>
+     * </ul>
+     */
+    public static class Type {
 
-    /** field values are interpreted as numeric short values. */
-    public static final Type SHORT = new Type("short"); 
+        /** field values are interpreted as numeric byte values. */
+        public static final Type BYTE = new Type("byte");
 
-    /** field values are interpreted as numeric int values. */
-    public static final Type INT = new Type("int"); 
+        /** field values are interpreted as numeric short values. */
+        public static final Type SHORT = new Type("short");
 
-    /** field values are interpreted as numeric float values. */
-    public static final Type FLOAT = new Type("float"); 
+        /** field values are interpreted as numeric int values. */
+        public static final Type INT = new Type("int");
 
-    private String typeName;
-    private Type (String name) {
-      this.typeName = name;
-    }
-    /*(non-Javadoc) @see java.lang.Object#toString() */
-    @Override
-    public String toString() {
-      return getClass().getName()+"::"+typeName;
-    }
-  }
-  
-  /**
-   * Create a FieldScoreQuery - a query that scores each document as the value of the numeric input field.
-   * <p>
-   * The <code>type</code> param tells how to parse the field string values into a numeric score value.
-   * @param field the numeric field to be used.
-   * @param type the type of the field: either
-   * {@link Type#BYTE}, {@link Type#SHORT}, {@link Type#INT}, or {@link Type#FLOAT}. 
-   */
-  public FieldScoreQuery(String field, Type type) {
-    super(getValueSource(field,type));
-  }
+        /** field values are interpreted as numeric float values. */
+        public static final Type FLOAT = new Type("float");
 
-  // create the appropriate (cached) field value source.  
-  private static ValueSource getValueSource(String field, Type type) {
-    if (type == Type.BYTE) {
-      return new ByteFieldSource(field);
+        private String typeName;
+
+        private Type(String name) {
+            this.typeName = name;
+        }
+
+        /*(non-Javadoc) @see java.lang.Object#toString() */
+        @Override
+        public String toString() {
+            return getClass().getName() + "::" + typeName;
+        }
     }
-    if (type == Type.SHORT) {
-      return new ShortFieldSource(field);
+
+    /**
+     * Create a FieldScoreQuery - a query that scores each document as the value of the numeric input field.
+     * <p>
+     * The <code>type</code> param tells how to parse the field string values into a numeric score value.
+     * @param field the numeric field to be used.
+     * @param type the type of the field: either
+     * {@link Type#BYTE}, {@link Type#SHORT}, {@link Type#INT}, or {@link Type#FLOAT}.
+     */
+    public FieldScoreQuery(String field, Type type) {
+        super(getValueSource(field, type));
     }
-    if (type == Type.INT) {
-      return new IntFieldSource(field);
+
+    // create the appropriate (cached) field value source.
+    private static ValueSource getValueSource(String field, Type type) {
+        if (type == Type.BYTE) {
+            return new ByteFieldSource(field);
+        }
+        if (type == Type.SHORT) {
+            return new ShortFieldSource(field);
+        }
+        if (type == Type.INT) {
+            return new IntFieldSource(field);
+        }
+        if (type == Type.FLOAT) {
+            return new FloatFieldSource(field);
+        }
+        throw new IllegalArgumentException(type + " is not a known Field Score Query Type!");
     }
-    if (type == Type.FLOAT) {
-      return new FloatFieldSource(field);
-    }
-    throw new IllegalArgumentException(type+" is not a known Field Score Query Type!");
-  }
 
 }

@@ -7,9 +7,9 @@ package org.apache.lucene.store;
  * The ASF licenses this file to You under the Apache License, Version 2.0
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -27,51 +27,51 @@ import java.util.zip.Checksum;
  * @lucene.internal
  */
 public class ChecksumIndexInput extends IndexInput {
-  IndexInput main;
-  Checksum digest;
+    IndexInput main;
+    Checksum digest;
 
-  public ChecksumIndexInput(IndexInput main) {
-    super("ChecksumIndexInput(" + main + ")");
-    this.main = main;
-    digest = new CRC32();
-  }
+    public ChecksumIndexInput(IndexInput main) {
+        super("ChecksumIndexInput(" + main + ")");
+        this.main = main;
+        digest = new CRC32();
+    }
 
-  @Override
-  public byte readByte() throws IOException {
-    final byte b = main.readByte();
-    digest.update(b);
-    return b;
-  }
+    @Override
+    public byte readByte() throws IOException {
+        final byte b = main.readByte();
+        digest.update(b);
+        return b;
+    }
 
-  @Override
-  public void readBytes(byte[] b, int offset, int len)
-    throws IOException {
-    main.readBytes(b, offset, len);
-    digest.update(b, offset, len);
-  }
+    @Override
+    public void readBytes(byte[] b, int offset, int len)
+            throws IOException {
+        main.readBytes(b, offset, len);
+        digest.update(b, offset, len);
+    }
 
-  
-  public long getChecksum() {
-    return digest.getValue();
-  }
 
-  @Override
-  public void close() throws IOException {
-    main.close();
-  }
+    public long getChecksum() {
+        return digest.getValue();
+    }
 
-  @Override
-  public long getFilePointer() {
-    return main.getFilePointer();
-  }
+    @Override
+    public void close() throws IOException {
+        main.close();
+    }
 
-  @Override
-  public void seek(long pos) {
-    throw new UnsupportedOperationException();
-  }
+    @Override
+    public long getFilePointer() {
+        return main.getFilePointer();
+    }
 
-  @Override
-  public long length() {
-    return main.length();
-  }
+    @Override
+    public void seek(long pos) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public long length() {
+        return main.length();
+    }
 }

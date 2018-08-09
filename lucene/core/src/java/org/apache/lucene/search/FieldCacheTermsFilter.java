@@ -7,9 +7,9 @@ package org.apache.lucene.search;
  * The ASF licenses this file to You under the Apache License, Version 2.0
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,28 +17,28 @@ package org.apache.lucene.search;
  * limitations under the License.
  */
 
-import java.io.IOException;
-
 import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.index.TermDocs;
 import org.apache.lucene.util.FixedBitSet;
-import org.apache.lucene.index.TermDocs;  // for javadocs
+
+import java.io.IOException;
 
 /**
  * A {@link Filter} that only accepts documents whose single
  * term value in the specified field is contained in the
  * provided set of allowed terms.
- * 
+ *
  * <p/>
- * 
+ *
  * This is the same functionality as TermsFilter (from
  * contrib/queries), except this filter requires that the
  * field contains only a single term for all documents.
  * Because of drastically different implementations, they
  * also have different performance characteristics, as
  * described below.
- * 
+ *
  * <p/>
- * 
+ *
  * The first invocation of this filter on a given field will
  * be slower, since a {@link FieldCache.StringIndex} must be
  * created.  Subsequent invocations using the same field
@@ -47,10 +47,10 @@ import org.apache.lucene.index.TermDocs;  // for javadocs
  * is consumed to hold the cache, and is not freed until the
  * {@link IndexReader} is closed.  In contrast, TermsFilter
  * has no persistent RAM consumption.
- * 
- * 
+ *
+ *
  * <p/>
- * 
+ *
  * With each search, this filter translates the specified
  * set of Terms into a private {@link FixedBitSet} keyed by
  * term number per unique {@link IndexReader} (normally one
@@ -64,9 +64,9 @@ import org.apache.lucene.index.TermDocs;  // for javadocs
  * However, because docIDs are simply scanned linearly, an
  * index with a great many small documents may find this
  * linear scan too costly.
- * 
+ *
  * <p/>
- * 
+ *
  * In contrast, TermsFilter builds up an {@link FixedBitSet},
  * keyed by docID, every time it's created, by enumerating
  * through all matching docs using {@link TermDocs} to seek
@@ -76,9 +76,9 @@ import org.apache.lucene.index.TermDocs;  // for javadocs
  * approach requires a number of "disk seeks" in proportion
  * to the number of terms, which can be exceptionally costly
  * when there are cache misses in the OS's IO cache.
- * 
+ *
  * <p/>
- * 
+ *
  * Generally, this filter will be slower on the first
  * invocation for a given field, but subsequent invocations,
  * even if you change the allowed set of Terms, should be
@@ -94,33 +94,33 @@ import org.apache.lucene.index.TermDocs;  // for javadocs
  */
 
 public class FieldCacheTermsFilter extends Filter {
-  private String field;
-  private String[] terms;
+    private String field;
+    private String[] terms;
 
-  public FieldCacheTermsFilter(String field, String... terms) {
-    this.field = field;
-    this.terms = terms;
-  }
-
-  public FieldCache getFieldCache() {
-    return FieldCache.DEFAULT;
-  }
-
-  @Override
-  public DocIdSet getDocIdSet(IndexReader reader) throws IOException {
-    final FieldCache.StringIndex fcsi = getFieldCache().getStringIndex(reader, field);
-    final FixedBitSet bits = new FixedBitSet(fcsi.lookup.length);
-    for (int i=0;i<terms.length;i++) {
-      int termNumber = fcsi.binarySearchLookup(terms[i]);
-      if (termNumber > 0) {
-        bits.set(termNumber);
-      }
+    public FieldCacheTermsFilter(String field, String... terms) {
+        this.field = field;
+        this.terms = terms;
     }
-    return new FieldCacheDocIdSet(reader) {
-      @Override
-      protected final boolean matchDoc(int doc) {
-        return bits.get(fcsi.order[doc]);
-      }
-    };
-  }
+
+    public FieldCache getFieldCache() {
+        return FieldCache.DEFAULT;
+    }
+
+    @Override
+    public DocIdSet getDocIdSet(IndexReader reader) throws IOException {
+        final FieldCache.StringIndex fcsi = getFieldCache().getStringIndex(reader, field);
+        final FixedBitSet bits = new FixedBitSet(fcsi.lookup.length);
+        for (int i = 0; i < terms.length; i++) {
+            int termNumber = fcsi.binarySearchLookup(terms[i]);
+            if (termNumber > 0) {
+                bits.set(termNumber);
+            }
+        }
+        return new FieldCacheDocIdSet(reader) {
+            @Override
+            protected final boolean matchDoc(int doc) {
+                return bits.get(fcsi.order[doc]);
+            }
+        };
+    }
 }

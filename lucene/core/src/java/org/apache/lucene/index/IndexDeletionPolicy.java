@@ -7,9 +7,9 @@ package org.apache.lucene.index;
  * The ASF licenses this file to You under the Apache License, Version 2.0
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,12 +17,12 @@ package org.apache.lucene.index;
  * limitations under the License.
  */
 
-import java.util.List;
 import java.io.IOException;
+import java.util.List;
 
 /**
  * <p>Expert: policy for deletion of stale {@link IndexCommit index commits}. 
- * 
+ *
  * <p>Implement this interface, and pass it to one
  * of the {@link IndexWriter} or {@link IndexReader}
  * constructors, to customize when older
@@ -50,49 +50,49 @@ import java.io.IOException;
 
 public interface IndexDeletionPolicy {
 
-  /**
-   * <p>This is called once when a writer is first
-   * instantiated to give the policy a chance to remove old
-   * commit points.</p>
-   * 
-   * <p>The writer locates all index commits present in the 
-   * index directory and calls this method.  The policy may 
-   * choose to delete some of the commit points, doing so by
-   * calling method {@link IndexCommit#delete delete()} 
-   * of {@link IndexCommit}.</p>
-   * 
-   * <p><u>Note:</u> the last CommitPoint is the most recent one,
-   * i.e. the "front index state". Be careful not to delete it,
-   * unless you know for sure what you are doing, and unless 
-   * you can afford to lose the index content while doing that. 
-   *
-   * @param commits List of current 
-   * {@link IndexCommit point-in-time commits},
-   *  sorted by age (the 0th one is the oldest commit).
-   */
-  public void onInit(List<? extends IndexCommit> commits) throws IOException;
+    /**
+     * <p>This is called once when a writer is first
+     * instantiated to give the policy a chance to remove old
+     * commit points.</p>
+     *
+     * <p>The writer locates all index commits present in the
+     * index directory and calls this method.  The policy may
+     * choose to delete some of the commit points, doing so by
+     * calling method {@link IndexCommit#delete delete()}
+     * of {@link IndexCommit}.</p>
+     *
+     * <p><u>Note:</u> the last CommitPoint is the most recent one,
+     * i.e. the "front index state". Be careful not to delete it,
+     * unless you know for sure what you are doing, and unless
+     * you can afford to lose the index content while doing that.
+     *
+     * @param commits List of current
+     * {@link IndexCommit point-in-time commits},
+     *  sorted by age (the 0th one is the oldest commit).
+     */
+    public void onInit(List<? extends IndexCommit> commits) throws IOException;
 
-  /**
-   * <p>This is called each time the writer completed a commit.
-   * This gives the policy a chance to remove old commit points
-   * with each commit.</p>
-   *
-   * <p>The policy may now choose to delete old commit points 
-   * by calling method {@link IndexCommit#delete delete()} 
-   * of {@link IndexCommit}.</p>
-   * 
-   * <p>This method is only called when {@link
-   * IndexWriter#commit} or {@link IndexWriter#close} is
-   * called, or possibly not at all if the {@link
-   * IndexWriter#rollback} is called.
-   *
-   * <p><u>Note:</u> the last CommitPoint is the most recent one,
-   * i.e. the "front index state". Be careful not to delete it,
-   * unless you know for sure what you are doing, and unless 
-   * you can afford to lose the index content while doing that.
-   *  
-   * @param commits List of {@link IndexCommit},
-   *  sorted by age (the 0th one is the oldest commit).
-   */
-  public void onCommit(List<? extends IndexCommit> commits) throws IOException;
+    /**
+     * <p>This is called each time the writer completed a commit.
+     * This gives the policy a chance to remove old commit points
+     * with each commit.</p>
+     *
+     * <p>The policy may now choose to delete old commit points
+     * by calling method {@link IndexCommit#delete delete()}
+     * of {@link IndexCommit}.</p>
+     *
+     * <p>This method is only called when {@link
+     * IndexWriter#commit} or {@link IndexWriter#close} is
+     * called, or possibly not at all if the {@link
+     * IndexWriter#rollback} is called.
+     *
+     * <p><u>Note:</u> the last CommitPoint is the most recent one,
+     * i.e. the "front index state". Be careful not to delete it,
+     * unless you know for sure what you are doing, and unless
+     * you can afford to lose the index content while doing that.
+     *
+     * @param commits List of {@link IndexCommit},
+     *  sorted by age (the 0th one is the oldest commit).
+     */
+    public void onCommit(List<? extends IndexCommit> commits) throws IOException;
 }

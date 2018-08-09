@@ -5,9 +5,9 @@
  * The ASF licenses this file to You under the Apache License, Version 2.0
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -28,44 +28,44 @@ import java.io.Reader;
  */
 public final class CharReader extends CharStream {
 
-  private final Reader input;
-  
-  public static CharStream get(Reader input) {
-    return input instanceof CharStream ?
-      (CharStream)input : new CharReader(input);
-  }
+    private final Reader input;
 
-  private CharReader(Reader in) {
-    input = in;
-  }
+    public static CharStream get(Reader input) {
+        return input instanceof CharStream ?
+                (CharStream) input : new CharReader(input);
+    }
 
-  @Override
-  public int correctOffset(int currentOff) {
-    return currentOff;
-  }
+    private CharReader(Reader in) {
+        input = in;
+    }
 
-  @Override
-  public void close() throws IOException {
-    input.close();
-  }
+    @Override
+    public int correctOffset(int currentOff) {
+        return currentOff;
+    }
 
-  @Override
-  public int read(char[] cbuf, int off, int len) throws IOException {
-    return input.read(cbuf, off, len);
-  }
+    @Override
+    public void close() throws IOException {
+        input.close();
+    }
 
-  @Override
-  public boolean markSupported(){
-    return input.markSupported();
-  }
+    @Override
+    public int read(char[] cbuf, int off, int len) throws IOException {
+        return input.read(cbuf, off, len);
+    }
 
-  @Override
-  public void mark( int readAheadLimit ) throws IOException {
-    input.mark(readAheadLimit);
-  }
+    @Override
+    public boolean markSupported() {
+        return input.markSupported();
+    }
 
-  @Override
-  public void reset() throws IOException {
-    input.reset();
-  }
+    @Override
+    public void mark(int readAheadLimit) throws IOException {
+        input.mark(readAheadLimit);
+    }
+
+    @Override
+    public void reset() throws IOException {
+        input.reset();
+    }
 }
